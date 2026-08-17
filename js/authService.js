@@ -444,9 +444,37 @@ const NutriAIAuthService = {
       if (this.supabaseClient) {
         this.supabaseClient.auth.signOut().catch(() => {});
       }
+      if (typeof NutriAIApiClient !== "undefined" && NutriAIApiClient) {
+        NutriAIApiClient.logout();
+      }
     } catch {}
+
     if (window.appState) {
       window.appState.logout();
+    }
+
+    // Clear AI chat messages container if present
+    const chatContainer = document.getElementById("aiChatMessages");
+    if (chatContainer) {
+      chatContainer.innerHTML = `
+        <div class="ai-chat-bubble ai">
+          <div class="bubble-avatar">🤖</div>
+          <div class="bubble-content">
+            <p>Hello! I am your <strong>NutriAI Nutrition Assistant</strong>. Sign in or create a profile to ask personalized dietary advice!</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Close any open popovers or dropdowns
+    const dropdown = document.getElementById("userAccountDropdown");
+    if (dropdown) dropdown.classList.remove("active");
+    const avatarBtn = document.getElementById("topbarAvatarBtn");
+    if (avatarBtn) avatarBtn.setAttribute("aria-expanded", "false");
+
+    // Navigate immediately away from protected views to #/login
+    if (typeof NutriAINav !== "undefined" && NutriAINav) {
+      NutriAINav.navigateTo("login", true);
     }
   }
 };
