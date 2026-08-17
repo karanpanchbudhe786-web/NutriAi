@@ -255,3 +255,8 @@ def get_current_user():
     profile_dict["bmiCategory"] = targets["bmiCategory"]
 
     return jsonify({"success": True, "user": profile_dict, "profile": profile_dict, "targets": targets})
+
+@auth_bp.route("/logout", methods=["POST"])
+def logout():
+    return jsonify({"success": True, "message": "Session terminated successfully."}), 200
+
