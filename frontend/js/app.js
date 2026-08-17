@@ -448,32 +448,66 @@ const NutriAIApp = {
       if (line2) line2.className = `wizard-step-line ${step >= 3 ? "active" : ""}`;
     };
 
+    this._setWizardStep = setWizardStep;
+
     this.resetWizard = () => {
       setWizardStep(1);
       ["wizardError1", "wizardError2", "wizardError3"].forEach(id => {
         const el = document.getElementById(id);
-        if (el) { el.style.display = "none"; el.textContent = ""; }
+        if (el) { el.style.display = "none"; el.innerHTML = ""; }
       });
     };
 
     // Step 1 -> Step 2
     const btnNext1 = document.getElementById("btnWizardNext1");
     if (btnNext1) {
-      btnNext1.addEventListener("click", () => {
+      btnNext1.addEventListener("click", async () => {
         const name = document.getElementById("wizardName")?.value?.trim();
         const email = document.getElementById("wizardEmail")?.value?.trim();
         const pass = document.getElementById("wizardPassword")?.value;
         const passConf = document.getElementById("wizardPasswordConfirm")?.value;
         const errEl = document.getElementById("wizardError1");
 
-        const showErr = (msg) => {
-          if (errEl) { errEl.textContent = msg; errEl.style.display = "block"; }
+        const showErr = (msg, isHtml = false) => {
+          if (errEl) {
+            if (isHtml) errEl.innerHTML = msg;
+            else errEl.textContent = msg;
+            errEl.style.display = "block";
+          }
         };
 
         if (!name) return showErr("Please enter your full name.");
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr("Please enter a valid email address.");
         if (!pass || pass.length < 6) return showErr("Password must be at least 6 characters long.");
         if (pass !== passConf) return showErr("Passwords do not match. Please re-enter.");
+
+        // Fast Email Duplicate Check in Step 1
+        try {
+          btnNext1.disabled = true;
+          btnNext1.textContent = "Checking...";
+          const auth = window.NutriAIAuthService || NutriAIAuthService;
+          if (auth && typeof auth.checkEmailExists === "function") {
+            const exists = await auth.checkEmailExists(email);
+            if (exists) {
+              showErr(`
+                <div style="display:flex; flex-direction:column; gap:0.5rem; text-align:left;">
+                  <div>⚠️ An account already exists for <strong>${email}</strong>. Please sign in or use a different email.</div>
+                  <div style="display:flex; gap:0.5rem; margin-top:0.35rem;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="NutriAIApp.switchToSignInFromWizard('${email.replace(/'/g, "\\'")}')" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">🔑 Sign In to Existing Account</button>
+                  </div>
+                </div>
+              `, true);
+              btnNext1.disabled = false;
+              btnNext1.textContent = "Next: Biometrics →";
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("Email precheck warning:", e);
+        } finally {
+          btnNext1.disabled = false;
+          btnNext1.textContent = "Next: Biometrics →";
+        }
 
         if (errEl) errEl.style.display = "none";
         setWizardStep(2);
@@ -650,7 +684,20 @@ const NutriAIApp = {
           setWizardStep(4);
         } catch (err) {
           if (errEl) {
-            errEl.textContent = err.message || "Failed to create profile.";
+            const isEmailExists = err.code === "EMAIL_EXISTS" || (err.message && (err.message.includes("already exists") || err.message.includes("EMAIL_EXISTS")));
+            if (isEmailExists) {
+              errEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:0.5rem; text-align:left;">
+                  <div>⚠️ An account already exists for <strong>${email}</strong>.</div>
+                  <div style="display:flex; gap:0.5rem; margin-top:0.35rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="NutriAIApp.switchToSignInFromWizard('${email.replace(/'/g, "\\'")}')" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">🔑 Sign In</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="NutriAIApp.goToWizardStep(1)" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">✏️ Change Email</button>
+                  </div>
+                </div>
+              `;
+            } else {
+              errEl.textContent = err.message || "Failed to create profile.";
+            }
             errEl.style.display = "block";
           }
         } finally {
@@ -1024,6 +1071,25 @@ const NutriAIApp = {
   closeAllModals() {
     document.querySelectorAll(".modal-backdrop").forEach(m => m.classList.remove("active"));
     document.body.style.overflow = "";
+  },
+
+  switchToSignInFromWizard(email = "") {
+    this.closeAllModals();
+    this.openModal("modalAuthLogin");
+    if (email) {
+      const emailInput = document.getElementById("loginEmail");
+      if (emailInput) {
+        emailInput.value = email;
+        const passInput = document.getElementById("loginPassword");
+        if (passInput) passInput.focus();
+      }
+    }
+  },
+
+  goToWizardStep(stepNum) {
+    if (typeof this._setWizardStep === "function") {
+      this._setWizardStep(stepNum);
+    }
   },
 
   showToast(message, type = "success") {
