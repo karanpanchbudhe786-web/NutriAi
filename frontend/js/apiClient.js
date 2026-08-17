@@ -5,6 +5,7 @@
 
 const NutriAIApiClient = {
   API_BASE_URL_KEY: "nutriai_api_base_url",
+  DEFAULT_CLOUD_URL: "https://nutriai-backend-y91i.onrender.com/api",
   DEFAULT_LOCAL_URL: "http://localhost:5000/api",
   TOKEN_KEY: "nutriai_jwt_token_v4",
   isServerOnline: false,
@@ -12,9 +13,9 @@ const NutriAIApiClient = {
   getBaseUrl() {
     try {
       const custom = localStorage.getItem(this.API_BASE_URL_KEY);
-      return custom ? custom.trim().replace(/\/+$/, "") : this.DEFAULT_LOCAL_URL;
+      return custom ? custom.trim().replace(/\/+$/, "") : this.DEFAULT_CLOUD_URL;
     } catch {
-      return this.DEFAULT_LOCAL_URL;
+      return this.DEFAULT_CLOUD_URL;
     }
   },
 
