@@ -160,6 +160,7 @@ def get_tracking_state():
         "fatRemaining": fat_remaining,
         "fiberConsumed": fiber_consumed,
         "fiberTarget": targets["fiber"],
+        "water": water_ml,
         "waterIntake": water_ml,
         "waterTarget": water_target,
         "waterRemaining": water_remaining,
