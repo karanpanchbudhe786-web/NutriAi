@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NutriAI — System Architecture & Developer Guide</title>
+  
+  <!-- Favicons & Brand Assets -->
+  <link rel="icon" type="image/png" href="assets/branding/nutriai-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/branding/nutriai-favicon.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
@@ -39,7 +44,7 @@
     .guide-header h1 {
       font-size: 2.5rem;
       font-weight: 800;
-      margin: 0 0 0.5rem;
+      margin: 0.75rem 0 0.5rem;
       letter-spacing: -0.02em;
     }
     .guide-header p {
@@ -217,7 +222,10 @@
 
   <!-- HEADER -->
   <header class="guide-header">
-    <h1>🥗 NutriAI Full-Stack Architecture</h1>
+    <div style="margin-bottom:1rem; display:inline-block;">
+      <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI Official Logo" style="width:72px; height:72px; object-fit:contain; border-radius:50%; box-shadow:0 8px 24px rgba(0,0,0,0.35); border:2px solid rgba(212,175,55,0.45);">
+    </div>
+    <h1>NutriAI Full-Stack Architecture</h1>
     <p>Complete guide to how the Frontend, Backend, AI Engine, and SQLite Database work together.</p>
     <div class="guide-nav-bar">
       <a href="index.html" class="guide-nav-btn">🚀 Open NutriAI Dashboard</a>
