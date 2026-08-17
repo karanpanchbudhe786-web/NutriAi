@@ -428,30 +428,30 @@ class NutriAIState {
    * Returns a clean, single structured snapshot of real tracked nutrition & targets
    */
   getNutritionState() {
-    const totals = this.getTodayTotals();
+    const totals = this.getTodayTotals() || { calories: 0, protein: 0, carbs: 0, fats: 0, fiber: 0 };
     const targets = this.targets || {};
-    const p = (this.data && this.data.profile) ? this.data.profile : NutriAIData.defaultProfile;
+    const p = (this.data && this.data.profile) ? this.data.profile : {};
 
-    const dailyTarget = Number(targets.calories) || 2000;
+    const dailyTarget = Number(targets.calories) || 0;
     const caloriesConsumed = Number(totals.calories) || 0;
     const caloriesRemaining = Math.max(0, dailyTarget - caloriesConsumed);
 
-    const proteinTarget = Number(targets.protein) || 120;
+    const proteinTarget = Number(targets.protein) || 0;
     const proteinConsumed = Number(totals.protein) || 0;
     const proteinRemaining = Math.max(0, proteinTarget - proteinConsumed);
 
-    const carbsTarget = Number(targets.carbs) || 200;
+    const carbsTarget = Number(targets.carbs) || 0;
     const carbsConsumed = Number(totals.carbs) || 0;
     const carbsRemaining = Math.max(0, carbsTarget - carbsConsumed);
 
-    const fatTarget = Number(targets.fats) || 60;
+    const fatTarget = Number(targets.fats) || 0;
     const fatConsumed = Number(totals.fats) || 0;
     const fatRemaining = Math.max(0, fatTarget - fatConsumed);
 
-    const fiberTarget = Number(targets.fiber) || 30;
+    const fiberTarget = Number(targets.fiber) || 0;
     const fiberConsumed = Number(totals.fiber) || 0;
 
-    const waterTarget = Number(targets.water) || 3200;
+    const waterTarget = Number(targets.water) || 0;
     const waterIntake = Number(this.data ? this.data.waterLogged : 0) || 0;
     const waterRemaining = Math.max(0, waterTarget - waterIntake);
 
