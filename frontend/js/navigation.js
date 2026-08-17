@@ -9,7 +9,12 @@ const NutriAINav = {
   init() {
     this.bindEvents();
     // Handle initial URL hash
-    const initialHash = window.location.hash.replace("#", "") || "dashboard";
+    const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
+    const initialRaw = window.location.hash.replace("#", "").replace("/", "").trim();
+    let initialHash = initialRaw || (isAuth ? "dashboard" : "login");
+    if (!isAuth && initialHash !== "login") {
+      initialHash = "login";
+    }
     this.navigateTo(initialHash, false);
   },
 
@@ -44,8 +49,8 @@ const NutriAINav = {
 
     // Window hashchange
     window.addEventListener("hashchange", () => {
-      const hash = window.location.hash.replace("#", "") || "dashboard";
-      this.navigateTo(hash, false);
+      const hash = window.location.hash.replace("#", "").replace("/", "").trim();
+      this.navigateTo(hash || "dashboard", false);
     });
   },
 
@@ -58,25 +63,35 @@ const NutriAINav = {
 
   navigateTo(viewId, updateHash = true) {
     const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
-    const protectedViews = ["profile", "mealplan", "nutrition", "wellness", "ai-chat", "reports", "settings"];
+    const protectedViews = [
+      "dashboard", "profile", "mealplan", "nutrition", "wellness",
+      "biomarkers", "genetics", "ai-insights", "ai-chat", "reports",
+      "specialists", "settings"
+    ];
 
-    if (!isAuth && protectedViews.includes(viewId)) {
-      if (typeof NutriAIApp !== "undefined" && NutriAIApp.showToast) {
-        NutriAIApp.showToast("Please sign in or create your profile to access this section.", "info");
-        NutriAIApp.openModal("modalAuthLogin");
+    if (!isAuth) {
+      // Unauthenticated users are redirected to login/landing view
+      if (protectedViews.includes(viewId) || viewId === "dashboard" || !viewId) {
+        viewId = "login";
+        if (updateHash) {
+          history.replaceState(null, "", "#login");
+        }
       }
-      viewId = "dashboard";
-      if (updateHash) {
-        history.replaceState(null, "", "#dashboard");
+    } else {
+      // Authenticated users requesting login are redirected to dashboard
+      if (viewId === "login" || !viewId) {
+        viewId = "dashboard";
+        if (updateHash) {
+          history.replaceState(null, "", "#dashboard");
+        }
       }
     }
 
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) {
-      // Invalid hash — fall back and correct the URL
-      viewId = "dashboard";
+      viewId = isAuth ? "dashboard" : "login";
       if (updateHash) {
-        history.replaceState(null, "", "#dashboard");
+        history.replaceState(null, "", `#${viewId}`);
       }
     }
 
@@ -117,6 +132,7 @@ const NutriAINav = {
 
   updateTopbarTitle(viewId) {
     const titles = {
+      "login": { title: "NutriAI Wellness Platform", sub: "Clinical AI Nutrition & Precision Metabolic Engine" },
       "dashboard": { title: "Daily Dashboard", sub: "Welcome back, track your nutritional progress" },
       "profile": { title: "Health Profile & Biometrics", sub: "Metabolic rate, body composition, and goal targets" },
       "mealplan": { title: "7-Day Meal Plan", sub: "Personalized nutrient-dense meals & smart grocery list" },
@@ -131,7 +147,7 @@ const NutriAINav = {
       "settings": { title: "Settings & Preferences", sub: "App preferences, measurement units, AI keys, and cloud sync" }
     };
 
-    const info = titles[viewId] || titles["dashboard"];
+    const info = titles[viewId] || titles["login"];
     const titleEl = document.getElementById("topbarTitle");
     const subEl = document.getElementById("topbarSubtitle");
 
