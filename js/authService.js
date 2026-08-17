@@ -392,11 +392,18 @@ const NutriAIAuthService = {
    * User Sign-Out
    */
   signOut() {
-    localStorage.removeItem(this.CURRENT_USER_KEY);
-    if (this.supabaseClient) {
-      this.supabaseClient.auth.signOut().catch(() => {});
+    try {
+      localStorage.removeItem(this.CURRENT_USER_KEY);
+      localStorage.removeItem("nutriai_jwt_token_v4");
+      localStorage.removeItem("nutriai_user_email");
+      localStorage.removeItem("nutriai_app_state_v3");
+      if (this.supabaseClient) {
+        this.supabaseClient.auth.signOut().catch(() => {});
+      }
+    } catch {}
+    if (window.appState) {
+      window.appState.logout();
     }
-    appState.logout();
   }
 };
 
