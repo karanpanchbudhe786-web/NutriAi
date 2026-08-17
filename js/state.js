@@ -22,9 +22,14 @@ class NutriAIState {
 
   loadState() {
     try {
+      const activeUser = localStorage.getItem("nutriai_active_user_v3");
+      const token = localStorage.getItem("nutriai_jwt_token_v4");
+      const hasAuth = Boolean(activeUser || token);
+
       const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
+      if (saved && hasAuth) {
         this.data = JSON.parse(saved);
+        this.data.isLoggedIn = true;
         // Ensure data structures exist
         if (!this.data.checkedMeals) this.data.checkedMeals = {};
         if (!Array.isArray(this.data.todayFoodLogs)) this.data.todayFoodLogs = [];
@@ -35,42 +40,58 @@ class NutriAIState {
         if (!this.data.completedHabits) this.data.completedHabits = {};
         if (!this.data.profile) this.data.profile = { ...NutriAIData.defaultProfile };
         if (!Array.isArray(this.data.weightHistory)) {
-          this.data.weightHistory = [
-            { date: "Today", weight: this.data.profile.weight || 70, note: "Initial check-in" }
-          ];
+          this.data.weightHistory = [];
         }
       } else {
-        this.resetToDefaults();
+        this.resetToGuestDefaults();
       }
     } catch (e) {
-      console.warn("Could not load localStorage, resetting to clean defaults:", e);
-      this.resetToDefaults();
+      console.warn("Could not load localStorage, resetting to clean guest defaults:", e);
+      this.resetToGuestDefaults();
     }
     this.recalculateTargets();
   }
 
-  resetToDefaults() {
+  resetToGuestDefaults() {
     const today = this._getTodayDayCode();
     this.data = {
-      isLoggedIn: true,
-      profile: { ...NutriAIData.defaultProfile },
+      isLoggedIn: false,
+      profile: {
+        name: "Guest Visitor",
+        email: "guest@nutriai.app",
+        gender: "male",
+        age: 25,
+        height: 170,
+        weight: 65,
+        targetWeight: 65,
+        activityLevel: "moderate",
+        goal: "balanced_nutrition",
+        dietPreference: "balanced",
+        sleep: 8.0,
+        exerciseFrequency: "3_5",
+        mealFrequency: 3,
+        cuisinePreference: "indian",
+        restrictions: []
+      },
       activeDay: today,
       checkedMeals: {}, // Zero checked meals initially
       waterLogged: 0, // Zero ml consumed initially
       waterDate: this._getTodayDateString(),
-      sleepLogged: 0, // Zero hrs initially
-      stepsLogged: 0, // Zero steps initially
-      streak: 0, // Zero day streak initially
-      todayFoodLogs: [], // Zero custom food items logged initially
-      completedHabits: {}, // Zero habits completed initially
-      weightHistory: [
-        { date: "Today", weight: NutriAIData.defaultProfile.weight || 70, note: "Initial check-in" }
-      ],
+      sleepLogged: 0,
+      stepsLogged: 0,
+      streak: 0,
+      todayFoodLogs: [],
+      completedHabits: {},
+      weightHistory: [],
       notifications: [
-        { id: 1, title: "Welcome to NutriAI", text: "Set your health profile and start tracking your meals!", time: "Just now", unread: true }
+        { id: 1, title: "Welcome to NutriAI", text: "Create an account or sign in to personalize your meal plan and track daily macros!", time: "Just now", unread: true }
       ]
     };
     this.saveState();
+  }
+
+  resetToDefaults() {
+    this.resetToGuestDefaults();
   }
 
   /**
@@ -272,7 +293,13 @@ class NutriAIState {
   }
 
   logout() {
-    this.resetToDefaults();
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem("nutriai_active_user_v3");
+      localStorage.removeItem("nutriai_jwt_token_v4");
+      localStorage.removeItem("nutriai_user_email");
+    } catch {}
+    this.resetToGuestDefaults();
     this.recalculateTargets();
     this.notify();
   }
