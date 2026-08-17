@@ -121,6 +121,15 @@ const NutriAIApiClient = {
     return await this.request("/auth/me", { method: "GET" });
   },
 
+  async logout() {
+    try {
+      if (this.getToken()) {
+        await this.request("/auth/logout", { method: "POST" }).catch(() => {});
+      }
+    } catch {}
+    this.setToken("");
+  },
+
   // --- Profile Endpoints ---
   async getProfile() {
     return await this.request("/profile", { method: "GET" });
