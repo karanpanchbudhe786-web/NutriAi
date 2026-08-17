@@ -132,19 +132,19 @@ const NutriAINav = {
 
   updateTopbarTitle(viewId) {
     const titles = {
-      "login": { title: "NutriAI Wellness Platform", sub: "Clinical AI Nutrition & Precision Metabolic Engine" },
-      "dashboard": { title: "Daily Dashboard", sub: "Welcome back, track your nutritional progress" },
-      "profile": { title: "Health Profile & Biometrics", sub: "Metabolic rate, body composition, and goal targets" },
-      "mealplan": { title: "7-Day Meal Plan", sub: "Personalized nutrient-dense meals & smart grocery list" },
-      "nutrition": { title: "Nutrition & Food Tracker", sub: "Macronutrient breakdown, calorie budget, and food log" },
-      "wellness": { title: "Wellness & Habit Streaks", sub: "Hydration, sleep, weight milestones, and daily routines" },
-      "biomarkers": { title: "Biomarkers & Laboratory Panels", sub: "Cardiometabolic, lipid, and micronutrient lab tracking [Preview]" },
-      "genetics": { title: "Nutrigenomic Insights", sub: "Genetic metabolic traits and personalized dietary responses [Preview]" },
-      "ai-insights": { title: "NutriAI Smart Recommendations", sub: "Evidence-grounded meal timing & macro optimization [Preview]" },
-      "ai-chat": { title: "AI Nutritionist Assistant", sub: "Interactive dietary intelligence grounded in your biometrics & food log" },
-      "reports": { title: "Metabolic Health Reports", sub: "Weekly nutrient analytics and executive summaries" },
-      "specialists": { title: "Specialist & Dietitian Network", sub: "Connect with board-certified sports dietitians and coaches [Preview]" },
-      "settings": { title: "Settings & Preferences", sub: "App preferences, measurement units, AI keys, and cloud sync" }
+      "login": { title: "NutriAI Wellness Platform", sub: "Clinical AI Nutrition & Precision Metabolic Engine", docTitle: "NutriAI — Clinical AI Nutrition Platform" },
+      "dashboard": { title: "Daily Dashboard", sub: "Welcome back, track your nutritional progress", docTitle: "NutriAI — Daily Dashboard" },
+      "profile": { title: "Health Profile & Biometrics", sub: "Metabolic rate, body composition, and goal targets", docTitle: "NutriAI — Health Profile & Biometrics" },
+      "mealplan": { title: "7-Day Meal Plan", sub: "Personalized nutrient-dense meals & smart grocery list", docTitle: "NutriAI — 7-Day Meal Plan" },
+      "nutrition": { title: "Nutrition & Food Tracker", sub: "Macronutrient breakdown, calorie budget, and food log", docTitle: "NutriAI — Nutrition Tracker" },
+      "wellness": { title: "Wellness & Habit Streaks", sub: "Hydration, sleep, weight milestones, and daily routines", docTitle: "NutriAI — Wellness & Habits" },
+      "biomarkers": { title: "Biomarkers & Laboratory Panels", sub: "Cardiometabolic, lipid, and micronutrient lab tracking [Preview]", docTitle: "NutriAI — Biomarkers" },
+      "genetics": { title: "Nutrigenomic Insights", sub: "Genetic metabolic traits and personalized dietary responses [Preview]", docTitle: "NutriAI — Genetics" },
+      "ai-insights": { title: "NutriAI Smart Recommendations", sub: "Evidence-grounded meal timing & macro optimization [Preview]", docTitle: "NutriAI — AI Recommendations" },
+      "ai-chat": { title: "AI Nutritionist Assistant", sub: "Interactive dietary intelligence grounded in your biometrics & food log", docTitle: "NutriAI — AI Nutritionist" },
+      "reports": { title: "Metabolic Health Reports", sub: "Weekly nutrient analytics and executive summaries", docTitle: "NutriAI — Health Reports" },
+      "specialists": { title: "Specialist & Dietitian Network", sub: "Connect with board-certified sports dietitians and coaches [Preview]", docTitle: "NutriAI — Specialist Network" },
+      "settings": { title: "Settings & Preferences", sub: "App preferences, measurement units, AI keys, and cloud sync", docTitle: "NutriAI — Settings" }
     };
 
     const info = titles[viewId] || titles["login"];
@@ -153,5 +153,8 @@ const NutriAINav = {
 
     if (titleEl) titleEl.textContent = info.title;
     if (subEl) subEl.textContent = info.sub;
+    if (info.docTitle) {
+      document.title = info.docTitle;
+    }
   }
 };
