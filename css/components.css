@@ -1215,4 +1215,66 @@
   color: #dc2626;
 }
 
+/* --- Official Brand Identity & Logos --- */
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.brand-logo-mark {
+  width: 36px;
+  height: 36px;
+  max-width: 36px;
+  max-height: 36px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.brand-logo:hover .brand-logo-mark {
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
+}
+
+.landing-hero-logo {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(6, 78, 59, 0.35);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.landing-hero-logo:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 20px 42px rgba(6, 78, 59, 0.45);
+}
+
+.auth-modal-logo {
+  max-width: 120px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+@media (max-width: 768px) {
+  .landing-hero-logo {
+    max-width: 160px;
+  }
+  .brand-logo-mark {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+
 
