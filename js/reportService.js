@@ -121,32 +121,32 @@ const NutriAIReportService = {
     <tbody>
       <tr>
         <td><strong>Protein Target</strong></td>
-        <td><span class="badge badge-blue">${targets.protein} g / day</span></td>
-        <td>${totals.protein} g logged</td>
+        <td><span class="badge badge-blue">${targets?.protein || 120} g / day</span></td>
+        <td>${totals?.protein || 0} g logged</td>
         <td>2.1g/kg bodyweight to maximize muscle protein synthesis and preserve lean tissue</td>
       </tr>
       <tr>
         <td><strong>Carbohydrate Target</strong></td>
-        <td><span class="badge badge-amber">${targets.carbs} g / day</span></td>
-        <td>${totals.carbs} g logged</td>
+        <td><span class="badge badge-amber">${targets?.carbs || 200} g / day</span></td>
+        <td>${totals?.carbs || 0} g logged</td>
         <td>Complex low-glycemic starches to support training energy and liver glycogen</td>
       </tr>
       <tr>
         <td><strong>Essential Dietary Fats</strong></td>
-        <td><span class="badge">${targets.fats} g / day</span></td>
-        <td>${totals.fats} g logged</td>
+        <td><span class="badge">${targets?.fats || 60} g / day</span></td>
+        <td>${totals?.fats || 0} g logged</td>
         <td>25% caloric ratio to support hormonal synthesis and fat-soluble vitamin absorption</td>
       </tr>
       <tr>
         <td><strong>Dietary Fiber</strong></td>
-        <td><span class="badge">${targets.fiber} g / day</span></td>
-        <td>${totals.fiber} g logged</td>
+        <td><span class="badge">${targets?.fiber || 30} g / day</span></td>
+        <td>${totals?.fiber || 0} g logged</td>
         <td>Prebiotic soluble and insoluble fibers for gut microbiome and glycemic control</td>
       </tr>
       <tr>
         <td><strong>Hydration Target</strong></td>
-        <td><span class="badge badge-blue">${(targets.water / 1000).toFixed(1)} L / day</span></td>
-        <td>${(state.data.waterLogged / 1000).toFixed(1)} L logged</td>
+        <td><span class="badge badge-blue">${(((targets?.water || 3200)) / 1000).toFixed(1)} L / day</span></td>
+        <td>${(((state?.data?.waterLogged || 0)) / 1000).toFixed(1)} L logged</td>
         <td>Optimizes blood volume, metabolic cellular hydration, and renal clearance</td>
       </tr>
     </tbody>
@@ -155,7 +155,7 @@ const NutriAIReportService = {
   <!-- Clinical Insights Callout -->
   <div class="callout">
     <strong>💡 NutriAI Clinical Assessment & Advisory:</strong><br/>
-    Client is adhering well to the <strong>${p.dietPreference || 'Balanced'}</strong> nutritional protocol. Total daily energy expenditure (TDEE) is calculated at <strong>${targets.tdee} kcal</strong>.
+    Client is adhering well to the <strong>${p?.dietPreference || 'Balanced'}</strong> nutritional protocol. Total daily energy expenditure (TDEE) is calculated at <strong>${targets?.tdee || 2200} kcal</strong>.
     The prescribed caloric deficit of ~450 kcal creates an optimal energy differential for sustainable adipose loss at ~0.5kg/week with zero muscle catabolism.
   </div>
 
