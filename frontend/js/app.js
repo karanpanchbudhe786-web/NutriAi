@@ -1682,33 +1682,54 @@ const NutriAIApp = {
   },
 
   renderWellness(state, targets) {
-    const waterLitres = (state.data.waterLogged / 1000).toFixed(1);
-    const targetLitres = (targets.water / 1000).toFixed(1);
-    const waterProgress = Math.min(100, (state.data.waterLogged / targets.water) * 100);
-
     const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+
+    if (!state?.data?.isLoggedIn || !state?.data?.profile || !targets) {
+      setTxt("wellnessWaterDisplay", "0.0 L / — L");
+      const waterProgBar = document.getElementById("wellnessWaterProgBar");
+      if (waterProgBar) waterProgBar.style.width = "0%";
+      setTxt("wellnessSleepDisplay", "0 hrs");
+      setTxt("wellnessCurrentWeight", "— kg");
+      const glassesContainer = document.getElementById("waterGlassesGrid");
+      if (glassesContainer) {
+        glassesContainer.innerHTML = Array.from({ length: 8 }, () => `
+          <div class="water-glass" title="Remaining">💧</div>
+        `).join("");
+      }
+      return;
+    }
+
+    const waterLogged = Number(state.data.waterLogged) || 0;
+    const waterTarget = Number(targets.water) || 3200;
+    const waterLitres = (waterLogged / 1000).toFixed(1);
+    const targetLitres = (waterTarget / 1000).toFixed(1);
+    const waterProgress = waterTarget > 0 ? Math.min(100, (waterLogged / waterTarget) * 100) : 0;
 
     setTxt("wellnessWaterDisplay", `${waterLitres} L / ${targetLitres} L`);
     const waterProgBar = document.getElementById("wellnessWaterProgBar");
     if (waterProgBar) waterProgBar.style.width = `${waterProgress}%`;
 
-    setTxt("wellnessSleepDisplay", `${state.data.sleepLogged} hrs`);
+    setTxt("wellnessSleepDisplay", `${state.data.sleepLogged || 0} hrs`);
 
-    const latestWeight = state.data.weightHistory[state.data.weightHistory.length - 1];
+    const weightHist = Array.isArray(state.data.weightHistory) ? state.data.weightHistory : [];
+    const latestWeight = weightHist.length > 0 ? weightHist[weightHist.length - 1] : null;
     if (latestWeight) {
       setTxt("wellnessCurrentWeight", `${latestWeight.weight} kg`);
-      const weightDiff = (latestWeight.weight - state.data.weightHistory[0].weight).toFixed(1);
+      const initialWeight = weightHist[0] ? weightHist[0].weight : latestWeight.weight;
+      const weightDiff = (latestWeight.weight - initialWeight).toFixed(1);
       const weightChangeEl = document.getElementById("wellnessWeightChange");
       if (weightChangeEl) {
         const sign = Number(weightDiff) <= 0 ? "" : "+";
         weightChangeEl.textContent = `${sign}${weightDiff} kg since start`;
         weightChangeEl.style.color = Number(weightDiff) <= 0 ? "var(--primary-600)" : "var(--color-danger)";
       }
+    } else {
+      setTxt("wellnessCurrentWeight", `${state.data.profile.weight || 70} kg`);
     }
 
     const glassesContainer = document.getElementById("waterGlassesGrid");
     if (glassesContainer) {
-      const filledGlasses = Math.min(8, Math.round((state.data.waterLogged / targets.water) * 8));
+      const filledGlasses = waterTarget > 0 ? Math.min(8, Math.round((waterLogged / waterTarget) * 8)) : 0;
       glassesContainer.innerHTML = Array.from({ length: 8 }, (_, i) => `
         <div class="water-glass ${i < filledGlasses ? 'filled' : ''}" title="${i < filledGlasses ? 'Consumed' : 'Remaining'}">
           💧
