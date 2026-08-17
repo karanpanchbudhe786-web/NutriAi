@@ -56,23 +56,7 @@ class NutriAIState {
     const today = this._getTodayDayCode();
     this.data = {
       isLoggedIn: false,
-      profile: {
-        name: "Guest Visitor",
-        email: "guest@nutriai.app",
-        gender: "male",
-        age: 25,
-        height: 170,
-        weight: 65,
-        targetWeight: 65,
-        activityLevel: "moderate",
-        goal: "balanced_nutrition",
-        dietPreference: "balanced",
-        sleep: 8.0,
-        exerciseFrequency: "3_5",
-        mealFrequency: 3,
-        cuisinePreference: "indian",
-        restrictions: []
-      },
+      profile: null,
       activeDay: today,
       checkedMeals: {}, // Zero checked meals initially
       waterLogged: 0, // Zero ml consumed initially
@@ -83,10 +67,9 @@ class NutriAIState {
       todayFoodLogs: [],
       completedHabits: {},
       weightHistory: [],
-      notifications: [
-        { id: 1, title: "Welcome to NutriAI", text: "Create an account or sign in to personalize your meal plan and track daily macros!", time: "Just now", unread: true }
-      ]
+      notifications: []
     };
+    this.targets = null;
     this.saveState();
   }
 
@@ -142,11 +125,21 @@ class NutriAIState {
    * Target calories & macros come purely from user's biometrics & goals.
    */
   recalculateTargets() {
-    const p = this.data.profile || NutriAIData.defaultProfile;
-    const weight = Number(p.weight) || 70;
-    const height = Number(p.height) || 175;
-    const age = Number(p.age) || 25;
+    if (!this.data.isLoggedIn || !this.data.profile) {
+      this.targets = null;
+      return null;
+    }
+
+    const p = this.data.profile;
+    const weight = Number(p.weight) || 0;
+    const height = Number(p.height) || 0;
+    const age = Number(p.age) || 0;
     const gender = p.gender || "male";
+
+    if (!weight || !height || !age) {
+      this.targets = null;
+      return null;
+    }
 
     // 1. BMI Calculation
     const heightM = height / 100;
@@ -256,6 +249,10 @@ class NutriAIState {
 
   // --- Profile Completion Calculator ---
   getProfileCompletion() {
+    if (!this.data.isLoggedIn || !this.data.profile) {
+      return { pct: 0, completed: [], missing: [] };
+    }
+
     const p = this.data.profile;
     const checks = [
       { key: "name", label: "Name", val: p.name && p.name.trim() !== "" },
