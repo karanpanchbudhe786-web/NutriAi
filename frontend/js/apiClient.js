@@ -93,12 +93,30 @@ const NutriAIApiClient = {
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || `Server request failed with status ${res.status}`);
+      const msg = data.message || data.error || `Server request failed with status ${res.status}`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.code = data.code || data.error || (res.status === 409 ? "EMAIL_EXISTS" : "REQUEST_FAILED");
+      err.data = data;
+      throw err;
     }
     return data;
   },
 
   // --- Auth Endpoints ---
+  async checkEmail(email) {
+    try {
+      const emailNorm = (email || "").toLowerCase().trim();
+      if (!emailNorm || !emailNorm.includes("@")) return { exists: false };
+      const res = await this.request(`/auth/check-email?email=${encodeURIComponent(emailNorm)}`, {
+        method: "GET"
+      });
+      return { exists: Boolean(res.exists), success: true, message: res.message };
+    } catch {
+      return { exists: false };
+    }
+  },
+
   async register(wizardData) {
     const res = await this.request("/auth/register", {
       method: "POST",
