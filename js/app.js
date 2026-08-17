@@ -272,12 +272,13 @@ const NutriAIApp = {
       });
     }
 
-    // Logout Button
+    // Logout Button (Sidebar)
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         NutriAIAuthService.signOut();
         this.showToast("Signed out successfully.", "info");
+        setTimeout(() => window.location.reload(), 250);
       });
     }
 
@@ -814,8 +815,9 @@ const NutriAIApp = {
       signOutBtn.addEventListener("click", () => {
         dropdown?.classList.remove("active");
         avatarBtn?.setAttribute("aria-expanded", "false");
-        appState.logout();
+        NutriAIAuthService.signOut();
         this.showToast("Signed out successfully.", "info");
+        setTimeout(() => window.location.reload(), 250);
       });
     }
 
