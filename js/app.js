@@ -304,8 +304,7 @@ const NutriAIApp = {
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         NutriAIAuthService.signOut();
-        this.showToast("Signed out successfully.", "info");
-        setTimeout(() => window.location.reload(), 250);
+        this.showToast("Signed out successfully. See you soon! 👋", "info");
       });
     }
 
@@ -890,8 +889,7 @@ const NutriAIApp = {
         dropdown?.classList.remove("active");
         avatarBtn?.setAttribute("aria-expanded", "false");
         NutriAIAuthService.signOut();
-        this.showToast("Signed out successfully.", "info");
-        setTimeout(() => window.location.reload(), 250);
+        this.showToast("Signed out successfully. See you soon! 👋", "info");
       });
     }
 
@@ -1183,6 +1181,7 @@ const NutriAIApp = {
     // Topbar Avatar & Dropdown Elements
     const topbarAvatarBtn = document.getElementById("topbarAvatarBtn");
     const topbarUserInitial = document.getElementById("topbarUserInitial");
+    const topbarGuestActions = document.getElementById("topbarGuestActions");
     const topbarSignInBtn = document.getElementById("topbarSignInBtn");
     const userAccountDropdown = document.getElementById("userAccountDropdown");
 
@@ -1193,6 +1192,7 @@ const NutriAIApp = {
 
     if (isLoggedIn) {
       if (topbarAvatarBtn) topbarAvatarBtn.style.display = "flex";
+      if (topbarGuestActions) topbarGuestActions.style.display = "none";
       if (topbarSignInBtn) topbarSignInBtn.style.display = "none";
       if (topbarUserInitial) topbarUserInitial.textContent = initial;
       if (menuUserAvatar) menuUserAvatar.textContent = initial;
@@ -1202,6 +1202,7 @@ const NutriAIApp = {
     } else {
       if (topbarAvatarBtn) topbarAvatarBtn.style.display = "none";
       if (userAccountDropdown) userAccountDropdown.classList.remove("active");
+      if (topbarGuestActions) topbarGuestActions.style.display = "flex";
       if (topbarSignInBtn) topbarSignInBtn.style.display = "inline-flex";
     }
 
