@@ -210,8 +210,11 @@
               </div>
             </div>
 
-            <!-- Unauthenticated Sign In Button (Fallback) -->
-            <button type="button" class="btn btn-secondary btn-sm" id="topbarSignInBtn" style="display:none;">Sign In</button>
+            <!-- Unauthenticated Sign In / Sign Up Buttons -->
+            <div id="topbarGuestActions" style="display:flex; gap:0.5rem; align-items:center;">
+              <button type="button" class="btn btn-secondary btn-sm" id="topbarSignInBtn" onclick="NutriAIApp.openModal('modalAuthLogin')">Sign In</button>
+              <button type="button" class="btn btn-primary btn-sm" id="topbarSignUpBtn" onclick="NutriAIApp.openModal('modalWizard')">Sign Up</button>
+            </div>
           </div>
         </div>
       </header>
@@ -220,9 +223,52 @@
       <main class="main-content">
 
         <!-- =========================================================
-             1. HOME DASHBOARD VIEW
+             0. DEDICATED LOGIN & GUEST LANDING VIEW (Active when logged out)
              ========================================================= -->
-        <section id="view-dashboard" class="view-section active">
+        <section id="view-login" class="view-section">
+          <div class="guest-welcome-hero" style="display:block; margin-bottom:2rem;">
+            <div style="max-width:820px; margin:0 auto; text-align:center;">
+              <span class="badge badge-emerald" style="font-size:0.8125rem; padding:0.35rem 0.85rem; margin-bottom:1rem; display:inline-block;">🥗 Clinical AI Nutrition & Metabolic Platform</span>
+              <h2 style="font-size:2.25rem; font-weight:800; color:var(--text-heading); margin-bottom:0.75rem; letter-spacing:-0.02em;">Welcome to NutriAI</h2>
+              <p style="font-size:1.1rem; color:var(--text-body); line-height:1.6; margin-bottom:2rem; max-width:680px; margin-left:auto; margin-right:auto;">
+                NutriAI generates clinical metabolic targets (BMR, TDEE, Mifflin-St Jeor macro splits) and individualized 7-day meal plans based purely on your biometric profile.
+              </p>
+              
+              <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:2.5rem;">
+                <button type="button" class="btn btn-primary" onclick="NutriAIApp.openModal('modalWizard')" style="padding:0.85rem 2rem; font-size:1.05rem; font-weight:700; box-shadow:0 4px 14px rgba(16,185,129,0.3);">
+                  ✨ Create Your Profile (3-Step Wizard)
+                </button>
+                <button type="button" class="btn btn-outline" onclick="NutriAIApp.openModal('modalAuthLogin')" style="padding:0.85rem 1.75rem; font-size:1.05rem; font-weight:600;">
+                  🔑 Sign In to Existing Account
+                </button>
+              </div>
+
+              <!-- Feature Highlights Grid -->
+              <div class="guest-hero-grid">
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🧬</span>
+                  <h4>Mifflin-St Jeor Metabolic Engine</h4>
+                  <p>Precision BMR, TDEE, and macronutrient ratios computed from your unique height, weight, age, and activity level.</p>
+                </div>
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🥗</span>
+                  <h4>Adaptive 7-Day Meal Schedules</h4>
+                  <p>Tailored dietary schedules across Indian, Mediterranean, and Continental cuisines with one-click recipe swaps.</p>
+                </div>
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🤖</span>
+                  <h4>Live AI Clinical Intelligence</h4>
+                  <p>Context-grounded nutritional guidance, ingredient substitutions, and real-time food log macro breakdown.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =========================================================
+             1. HOME DASHBOARD VIEW (Active when authenticated)
+             ========================================================= -->
+        <section id="view-dashboard" class="view-section">
           
           <!-- Guest Welcome Hero (Visible when no user is signed in) -->
           <div class="guest-welcome-hero" id="guestWelcomeHero" style="display:none;">
