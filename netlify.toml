@@ -1,11 +1,5 @@
-# Netlify Configuration for NutriAI
 [build]
-  publish = "."
-
-[[redirects]]
-  from = "/"
-  to = "/frontend/index.html"
-  status = 200
+  publish = "frontend"
 
 [[headers]]
   for = "/*"
