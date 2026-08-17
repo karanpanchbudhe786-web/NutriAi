@@ -89,6 +89,20 @@ const NutriAIApp = {
       topbarSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
     }
 
+    // Guest Hero Action Buttons
+    const guestStartWizardBtn = document.getElementById("guestStartWizardBtn");
+    if (guestStartWizardBtn) {
+      guestStartWizardBtn.addEventListener("click", () => {
+        this.resetWizard?.();
+        this.openModal("modalWizard");
+      });
+    }
+
+    const guestSignInBtn = document.getElementById("guestSignInBtn");
+    if (guestSignInBtn) {
+      guestSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
+    }
+
     // Switch between Login and Signup Modals
     const switchToSignup = document.getElementById("switchToSignup");
     if (switchToSignup) {
@@ -1071,19 +1085,21 @@ const NutriAIApp = {
   },
 
   renderUserBadge(state) {
-    const p = (state.data && state.data.profile) ? state.data.profile : {};
-    const isLoggedIn = Boolean(state.data && state.data.isLoggedIn !== false);
+    const isLoggedIn = Boolean(state.data && state.data.isLoggedIn && state.data.profile);
+    const p = isLoggedIn ? state.data.profile : {};
 
     // Compute Initial automatically from Name or Email
-    let initial = "U";
-    if (p.name && p.name.trim()) {
-      initial = p.name.trim().charAt(0).toUpperCase();
-    } else if (p.email && p.email.trim()) {
-      initial = p.email.trim().charAt(0).toUpperCase();
+    let initial = "G";
+    if (isLoggedIn) {
+      if (p.name && p.name.trim()) {
+        initial = p.name.trim().charAt(0).toUpperCase();
+      } else if (p.email && p.email.trim()) {
+        initial = p.email.trim().charAt(0).toUpperCase();
+      }
     }
 
-    const displayName = p.name || (p.email ? p.email.split("@")[0] : "User");
-    const displayEmail = p.email || "user@nutriai.app";
+    const displayName = isLoggedIn ? (p.name || (p.email ? p.email.split("@")[0] : "User")) : "Guest Visitor";
+    const displayEmail = isLoggedIn ? (p.email || "") : "";
 
     const goalTitles = {
       balanced_nutrition: "Balanced Nutrition",
@@ -1096,7 +1112,7 @@ const NutriAIApp = {
       maintenance: "Weight Maintenance",
       recomposition: "Body Recomp"
     };
-    const goalName = goalTitles[p.goal] || "Balanced Nutrition";
+    const goalName = isLoggedIn ? (goalTitles[p.goal] || "Balanced Nutrition") : "Sign in to personalize";
 
     // Topbar Avatar & Dropdown Elements
     const topbarAvatarBtn = document.getElementById("topbarAvatarBtn");
@@ -1127,13 +1143,55 @@ const NutriAIApp = {
     const userAvatarEl = document.getElementById("sidebarAvatar");
     const userNameEl = document.getElementById("sidebarUserName");
     const userPlanEl = document.getElementById("sidebarUserPlan");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     if (userAvatarEl) userAvatarEl.textContent = initial;
     if (userNameEl) userNameEl.textContent = displayName;
-    if (userPlanEl) userPlanEl.textContent = "Goal: " + goalName;
+    if (userPlanEl) userPlanEl.textContent = isLoggedIn ? ("Goal: " + goalName) : "Sign in to personalize";
+    if (logoutBtn) logoutBtn.style.display = isLoggedIn ? "block" : "none";
   },
 
   renderDashboardOverview(state, totals, targets) {
+    const isLoggedIn = Boolean(state.data && state.data.isLoggedIn && state.data.profile && targets);
+    const guestHero = document.getElementById("guestWelcomeHero");
+
+    if (!isLoggedIn || !targets) {
+      if (guestHero) guestHero.style.display = "block";
+
+      const setDashVal = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+
+      setDashVal("statCaloriesVal", "—");
+      setDashVal("statCaloriesTarget", "/ — kcal");
+      setDashVal("statCaloriesRemaining", "Sign in to calculate");
+      setDashVal("dashCaloriesBadge", "No Active Profile");
+      setDashVal("statProteinVal", "—");
+      setDashVal("statProteinTarget", "/ —g");
+      setDashVal("statProteinStatus", "—");
+      setDashVal("statCarbsVal", "—");
+      setDashVal("statCarbsTarget", "/ —g");
+      setDashVal("statCarbsStatus", "—");
+      setDashVal("statFatsVal", "—");
+      setDashVal("statFatsTarget", "/ —g");
+      setDashVal("statFatsStatus", "—");
+      setDashVal("statWaterVal", "0.0L");
+      setDashVal("statWaterTarget", "/ —L");
+      setDashVal("statWaterMeta", "Sign in to log water");
+
+      ["statCaloriesProgress", "statProteinProgress", "statCarbsProgress", "statFatsProgress", "statWaterProgress"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.width = "0%";
+      });
+
+      this.renderHealthOverviewCard(state, null);
+      this.renderHabits(state, totals, null);
+      return;
+    }
+
+    if (guestHero) guestHero.style.display = "none";
+
     // Calories Stat
     this._setStatCard("statCaloriesVal", "statCaloriesTarget", "statCaloriesProgress",
       totals.calories, targets.calories, "kcal");
@@ -1156,14 +1214,20 @@ const NutriAIApp = {
     // Protein Stat
     this._setStatCard("statProteinVal", "statProteinTarget", "statProteinProgress",
       totals.protein, targets.protein, "g");
+    const proteinStatus = document.getElementById("statProteinStatus");
+    if (proteinStatus) proteinStatus.textContent = "Optimal";
 
     // Carbs Stat
     this._setStatCard("statCarbsVal", "statCarbsTarget", "statCarbsProgress",
       totals.carbs, targets.carbs, "g");
+    const carbsStatus = document.getElementById("statCarbsStatus");
+    if (carbsStatus) carbsStatus.textContent = "Steady";
 
     // Fats Stat
     this._setStatCard("statFatsVal", "statFatsTarget", "statFatsProgress",
       totals.fats, targets.fats, "g");
+    const fatsStatus = document.getElementById("statFatsStatus");
+    if (fatsStatus) fatsStatus.textContent = "Balanced";
 
     // Water Stat
     const waterVal = document.getElementById("statWaterVal");
@@ -1199,23 +1263,33 @@ const NutriAIApp = {
   },
 
   renderHealthOverviewCard(state, targets) {
-    const completion = state.getProfileCompletion();
-    const p = state.data.profile;
-
     const compBar = document.getElementById("dashProfileCompBar");
     const compPct = document.getElementById("dashProfileCompPct");
-    if (compBar) compBar.style.width = `${completion.pct}%`;
-    if (compPct) compPct.textContent = `${completion.pct}%`;
-
     const bmiSummary = document.getElementById("dashBmiSummary");
     const goalSummary = document.getElementById("dashGoalSummary");
     const dietSummary = document.getElementById("dashDietSummary");
     const caloriesSummary = document.getElementById("dashCaloriesSummary");
 
+    if (!state.data.isLoggedIn || !state.data.profile || !targets) {
+      if (compBar) compBar.style.width = "0%";
+      if (compPct) compPct.textContent = "0%";
+      if (bmiSummary) bmiSummary.textContent = "— (Sign in to calculate)";
+      if (goalSummary) goalSummary.textContent = "—";
+      if (dietSummary) dietSummary.textContent = "—";
+      if (caloriesSummary) caloriesSummary.textContent = "— kcal/day";
+      return;
+    }
+
+    const completion = state.getProfileCompletion();
+    const p = state.data.profile;
+
+    if (compBar) compBar.style.width = `${completion.pct}%`;
+    if (compPct) compPct.textContent = `${completion.pct}%`;
+
     if (bmiSummary) {
       bmiSummary.textContent = `BMI ${targets.bmi} · ${targets.bmiCategory}`;
-      bmiSummary.style.color = targets.bmiColor;
     }
+
     const goalLabels = {
       balanced_nutrition: "Balanced Nutrition",
       general_fitness: "General Fitness",
@@ -1228,6 +1302,7 @@ const NutriAIApp = {
       recomposition: "Body Recomp"
     };
     if (goalSummary) goalSummary.textContent = goalLabels[p.goal] || "Wellness";
+
     const dietLabels = {
       balanced: "Non-Vegetarian (Omnivore)",
       vegetarian: "Vegetarian",
@@ -1279,6 +1354,22 @@ const NutriAIApp = {
     const listEl = document.getElementById("todayMealsScheduleList");
     if (!listEl) return;
 
+    if (!state.data.isLoggedIn || !state.data.profile || !state.targets) {
+      listEl.innerHTML = `
+        <div class="guest-lock-banner">
+          <div style="font-size:2.25rem; margin-bottom:0.5rem;">🔒</div>
+          <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-main); margin-bottom:0.35rem;">Personalized Meal Schedule</h4>
+          <p style="font-size:0.875rem; color:var(--text-muted); max-width:440px; margin:0 auto 1rem;">
+            Sign in or create your personalized health profile to view today's clinical meal schedule.
+          </p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="NutriAIApp.openModal('modalWizard')">
+            ✨ Start 3-Step Onboarding
+          </button>
+        </div>
+      `;
+      return;
+    }
+
     const today = state.data.activeDay || state._getTodayDayCode?.() || "Mon";
     const todayMeals = NutriAIMealFilter.getFilteredMeals(today, state.data.profile, state.targets);
 
@@ -1320,6 +1411,9 @@ const NutriAIApp = {
   },
 
   renderHealthProfile(state, targets) {
+    if (!state.data.isLoggedIn || !state.data.profile || !targets) {
+      return;
+    }
     const p = state.data.profile;
 
     const setVal = (id, val) => {
@@ -1368,6 +1462,7 @@ const NutriAIApp = {
   },
 
   renderBMIScale(targets) {
+    if (!targets) return;
     const needle = document.getElementById("bmiScaleNeedle");
     const bmiLabel = document.getElementById("bmiScaleLabel");
 
@@ -1381,6 +1476,9 @@ const NutriAIApp = {
   },
 
   renderMealPlanner(state) {
+    if (!state.data.isLoggedIn || !state.data.profile || !state.targets) {
+      return;
+    }
     const activeDay = state.data.activeDay || "Mon";
     const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -1491,17 +1589,25 @@ const NutriAIApp = {
     const setTxt = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
     const setWidth = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = `${Math.min(100, pct)}%`; };
 
-    setTxt("nutritionSummaryCals", `${totals.calories} / ${targets.calories} kcal`);
-    setTxt("nutritionSummaryProtein", `${totals.protein}g / ${targets.protein}g`);
-    setTxt("nutritionSummaryCarbs", `${totals.carbs}g / ${targets.carbs}g`);
-    setTxt("nutritionSummaryFats", `${totals.fats}g / ${targets.fats}g`);
-    setTxt("nutritionSummaryFiber", `${totals.fiber}g / ${targets.fiber}g`);
-
-    setWidth("nutCaloriesBar", (totals.calories / targets.calories) * 100);
-    setWidth("nutProteinBar", (totals.protein / targets.protein) * 100);
-    setWidth("nutCarbsBar", (totals.carbs / targets.carbs) * 100);
-    setWidth("nutFatsBar", (totals.fats / targets.fats) * 100);
-    setWidth("nutFiberBar", (totals.fiber / targets.fiber) * 100);
+    if (!state.data.isLoggedIn || !state.data.profile || !targets) {
+      setTxt("nutritionSummaryCals", "— / — kcal");
+      setTxt("nutritionSummaryProtein", "— / —g");
+      setTxt("nutritionSummaryCarbs", "— / —g");
+      setTxt("nutritionSummaryFats", "— / —g");
+      setTxt("nutritionSummaryFiber", "— / —g");
+      setWidth("nutCaloriesBar", 0);
+      setWidth("nutProteinBar", 0);
+      setWidth("nutCarbsBar", 0);
+      setWidth("nutFatsBar", 0);
+      setWidth("nutFiberBar", 0);
+      const remainingEl = document.getElementById("nutritionRemainingCals");
+      if (remainingEl) remainingEl.textContent = "Sign in to track";
+      const logsContainer = document.getElementById("todayFoodLogsList");
+      if (logsContainer) {
+        logsContainer.innerHTML = `<div style="padding:1.5rem; text-align:center; color:var(--text-muted);">Please sign in to log and track your meals.</div>`;
+      }
+      return;
+    }
 
     const remaining = targets.calories - totals.calories;
     const remainingEl = document.getElementById("nutritionRemainingCals");
@@ -1679,14 +1785,14 @@ const NutriAIApp = {
   },
 
   renderSettings() {
-    const p = appState.data.profile;
+    const p = appState.data.profile || {};
     const settingsProfileName = document.getElementById("settingsProfileName");
     const settingsDiet = document.getElementById("settingsDietDisplay");
     const settingsGoal = document.getElementById("settingsGoalDisplay");
 
-    if (settingsProfileName) settingsProfileName.textContent = p.name || "Alex Morgan";
-    if (settingsDiet) settingsDiet.textContent = p.dietPreference || "Balanced";
-    if (settingsGoal) settingsGoal.textContent = p.goal || "fat_loss";
+    if (settingsProfileName) settingsProfileName.textContent = appState.data.isLoggedIn ? (p.name || "User") : "Guest Visitor";
+    if (settingsDiet) settingsDiet.textContent = appState.data.isLoggedIn ? (p.dietPreference || "Not set") : "—";
+    if (settingsGoal) settingsGoal.textContent = appState.data.isLoggedIn ? (p.goal || "Not set") : "—";
 
     this.updateApiKeyStatus();
     this.updateSupabaseStatus();
@@ -1696,9 +1802,16 @@ const NutriAIApp = {
     const targets = appState.targets;
     const totals = appState.getTodayTotals();
 
+    if (!appState.data.isLoggedIn || !targets) {
+      NutriAICharts.renderWeeklyCalories("weeklyCaloriesCanvas", 0);
+      NutriAICharts.renderMacroDonut("macroDonutCanvas", 0, 0, 0);
+      NutriAICharts.renderWeightProgress("weightProgressCanvas", [], 0);
+      return;
+    }
+
     NutriAICharts.renderWeeklyCalories("weeklyCaloriesCanvas", targets.calories);
     NutriAICharts.renderMacroDonut("macroDonutCanvas", totals.protein, totals.carbs, totals.fats);
-    NutriAICharts.renderWeightProgress("weightProgressCanvas", appState.data.weightHistory, appState.data.profile.targetWeight);
+    NutriAICharts.renderWeightProgress("weightProgressCanvas", appState.data.weightHistory, appState.data.profile?.targetWeight || 0);
   },
 
   openRecipeModal(mealId, day = "Mon") {
