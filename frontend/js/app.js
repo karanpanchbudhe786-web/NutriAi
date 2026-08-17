@@ -33,7 +33,20 @@ const NutriAIApp = {
     window.addEventListener("resize", () => this.renderCharts());
     window.addEventListener("nutriai:viewchange", () => setTimeout(() => this.renderCharts(), 80));
 
-    // 7. Probe Dedicated Backend Server connection
+    // 7. Cross-Tab Session Synchronization
+    window.addEventListener("storage", (e) => {
+      if (e.key === "nutriai_active_user_v3" || e.key === "nutriai_jwt_token_v4") {
+        const hasSession = Boolean(localStorage.getItem("nutriai_active_user_v3") || localStorage.getItem("nutriai_jwt_token_v4"));
+        if (!hasSession && appState.data.isLoggedIn) {
+          appState.logout();
+          window.location.reload();
+        } else if (hasSession && !appState.data.isLoggedIn) {
+          window.location.reload();
+        }
+      }
+    });
+
+    // 8. Probe Dedicated Backend Server connection
     if (typeof NutriAIApiClient !== "undefined" && NutriAIApiClient) {
       NutriAIApiClient.checkHealth().then(online => {
         if (online) {
