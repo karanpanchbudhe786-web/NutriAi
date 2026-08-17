@@ -2,16 +2,1747 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=frontend/index.html" />
-  <title>NutriAI — Redirecting to Dashboard...</title>
-  <script>
-    window.location.href = "frontend/index.html" + window.location.hash;
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NutriAI — Personalized Nutrition & Metabolic Wellness Platform</title>
+  <meta name="description" content="NutriAI combines user biometrics, metabolic science, and personalized nutrition planning to help you reach your peak health and body composition goals." />
+  
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
 </head>
-<body style="font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f8fafc; color: #0f172a;">
-  <div style="text-align: center;">
-    <h2>🥗 Loading NutriAI...</h2>
-    <p>If you are not redirected automatically, <a href="frontend/index.html" style="color: #10b981; font-weight: bold;">click here</a>.</p>
+<body>
+
+  <!-- Backdrop for Mobile Sidebar Drawer -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+
+    <!-- =========================================================
+         SIDEBAR NAVIGATION
+         ========================================================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="#dashboard" class="brand-logo" data-nav-target="dashboard">
+          <div class="brand-icon">🥗</div>
+          <span>NutriAI</span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">Core Nutrition</div>
+        
+        <a href="#dashboard" class="nav-item active" data-nav-target="dashboard">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">📊</span>
+            <span>Dashboard</span>
+          </div>
+        </a>
+
+        <a href="#profile" class="nav-item" data-nav-target="profile">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">👤</span>
+            <span>Health Profile</span>
+          </div>
+        </a>
+
+        <a href="#mealplan" class="nav-item" data-nav-target="mealplan">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">🥗</span>
+            <span>Meal Plan</span>
+          </div>
+          <span class="badge badge-emerald" style="font-size:0.6875rem;">7 Days</span>
+        </a>
+
+        <a href="#nutrition" class="nav-item" data-nav-target="nutrition">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">📈</span>
+            <span>Nutrition & Tracker</span>
+          </div>
+        </a>
+
+        <a href="#wellness" class="nav-item" data-nav-target="wellness">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">⚡</span>
+            <span>Wellness & Streaks</span>
+          </div>
+        </a>
+
+        <div class="nav-group-title" style="margin-top:0.75rem;">Health Tech Previews</div>
+
+        <a href="#biomarkers" class="nav-item" data-nav-target="biomarkers">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">🧬</span>
+            <span>Biomarkers & Labs</span>
+          </div>
+          <span class="badge badge-preview">Demo</span>
+        </a>
+
+        <a href="#genetics" class="nav-item" data-nav-target="genetics">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">🔬</span>
+            <span>Genetic Insights</span>
+          </div>
+          <span class="badge badge-preview">Demo</span>
+        </a>
+
+        <div class="nav-group-title" style="margin-top:0.75rem;">AI Nutrition Intelligence</div>
+
+        <a href="#ai-chat" class="nav-item" data-nav-target="ai-chat">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">💬</span>
+            <span>AI Nutritionist</span>
+          </div>
+          <span class="badge badge-emerald" style="font-size:0.6875rem;">Live AI</span>
+        </a>
+
+        <a href="#ai-insights" class="nav-item" data-nav-target="ai-insights">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">✨</span>
+            <span>AI Recommendations</span>
+          </div>
+          <span class="badge badge-preview">Preview</span>
+        </a>
+
+        <a href="#reports" class="nav-item" data-nav-target="reports">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">📑</span>
+            <span>Insights & Reports</span>
+          </div>
+        </a>
+
+        <a href="#specialists" class="nav-item" data-nav-target="specialists">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">👩‍⚕️</span>
+            <span>Specialist Network</span>
+          </div>
+        </a>
+
+        <div class="nav-group-title" style="margin-top:0.75rem;">Account</div>
+
+        <a href="#settings" class="nav-item" data-nav-target="settings">
+          <div class="nav-item-content">
+            <span class="nav-item-icon">⚙️</span>
+            <span>Settings</span>
+          </div>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <div class="avatar" id="sidebarAvatar">A</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Alex Morgan</div>
+            <div class="user-plan" id="sidebarUserPlan">Goal: Lean Fat Loss</div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-icon-sm" id="loginBtnTrigger" title="Account / Switch Profile">⚙</button>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn" style="width:100%; margin-top:0.5rem; color:var(--text-muted); font-size:0.8125rem;">↩ Sign Out</button>
+      </div>
+    </aside>
+
+    <!-- =========================================================
+         MAIN CONTENT WRAPPER
+         ========================================================= -->
+    <div class="main-wrapper">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
+          <div class="topbar-title-wrap">
+            <h1 id="topbarTitle">Daily Dashboard</h1>
+            <p id="topbarSubtitle">Welcome back, track your nutritional progress</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button type="button" class="btn btn-ghost btn-icon-sm" id="notifBellBtn" title="Notifications" aria-label="Notifications">🔔</button>
+          <button type="button" class="btn btn-primary btn-sm" id="openAddFoodBtn">
+            <span>+</span> <span class="btn-text-hide">Log Meal</span>
+          </button>
+          <button type="button" class="btn btn-outline btn-sm" data-water-add="250">
+            <span>💧</span> <span class="btn-text-hide">+250ml</span>
+          </button>
+
+          <!-- User Profile Avatar & Dropdown Area -->
+          <div class="topbar-user-area" id="topbarUserArea">
+            <!-- Authenticated Avatar Button -->
+            <button type="button" class="topbar-avatar-btn" id="topbarAvatarBtn" aria-expanded="false" aria-haspopup="true" title="User Account Menu">
+              <span id="topbarUserInitial">A</span>
+            </button>
+
+            <!-- Account Popover / Dropdown Menu -->
+            <div class="user-account-dropdown" id="userAccountDropdown" role="menu">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar" id="menuUserAvatar">A</div>
+                <div class="dropdown-user-details">
+                  <div class="dropdown-user-name" id="menuUserName">Alex Morgan</div>
+                  <div class="dropdown-user-email" id="menuUserEmail">alex.morgan@example.com</div>
+                  <span class="badge badge-emerald" id="menuUserGoalBadge" style="font-size:0.6875rem; margin-top:0.25rem;">Balanced Nutrition</span>
+                </div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-items">
+                <button type="button" class="dropdown-item" id="menuHealthProfileBtn" role="menuitem">
+                  <span class="dropdown-item-icon">👤</span>
+                  <span>Health Profile</span>
+                </button>
+                <button type="button" class="dropdown-item" id="menuSettingsBtn" role="menuitem">
+                  <span class="dropdown-item-icon">⚙️</span>
+                  <span>Settings</span>
+                </button>
+                <button type="button" class="dropdown-item" id="menuPrivacyBtn" role="menuitem">
+                  <span class="dropdown-item-icon">🔒</span>
+                  <span>Privacy</span>
+                </button>
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-footer">
+                <button type="button" class="dropdown-item dropdown-item-danger" id="menuSignOutBtn" role="menuitem">
+                  <span class="dropdown-item-icon">↪</span>
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Unauthenticated Sign In Button (Fallback) -->
+            <button type="button" class="btn btn-secondary btn-sm" id="topbarSignInBtn" style="display:none;">Sign In</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN VIEWS CONTAINER -->
+      <main class="main-content">
+
+        <!-- =========================================================
+             1. HOME DASHBOARD VIEW
+             ========================================================= -->
+        <section id="view-dashboard" class="view-section active">
+          
+          <!-- Key Metrics Grid -->
+          <div class="stats-grid">
+            
+            <!-- Calories Card -->
+            <div class="stat-card">
+              <div class="stat-top">
+                <span class="stat-label">Daily Calories</span>
+                <span class="stat-icon">🔥</span>
+              </div>
+              <div class="stat-value">
+                <span id="statCaloriesVal">0</span>
+                <span class="stat-unit" id="statCaloriesTarget">/ 2150 kcal</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-emerald" id="statCaloriesProgress" style="width: 0%;"></div>
+              </div>
+              <div class="stat-meta">
+                <span id="statCaloriesGoalLabel">Target Caloric Goal</span>
+                <span id="statCaloriesRemaining">0 kcal logged</span>
+              </div>
+            </div>
+
+            <!-- Protein Card -->
+            <div class="stat-card stat-protein">
+              <div class="stat-top">
+                <span class="stat-label">Protein Target</span>
+                <span class="stat-icon">🥩</span>
+              </div>
+              <div class="stat-value">
+                <span id="statProteinVal">0</span>
+                <span class="stat-unit" id="statProteinTarget">/ 155g</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-blue" id="statProteinProgress" style="width: 0%;"></div>
+              </div>
+              <div class="stat-meta">
+                <span>2.1g / kg bodyweight</span>
+                <span>Optimal</span>
+              </div>
+            </div>
+
+            <!-- Carbohydrates Card -->
+            <div class="stat-card stat-carbs">
+              <div class="stat-top">
+                <span class="stat-label">Carbohydrates</span>
+                <span class="stat-icon">🌾</span>
+              </div>
+              <div class="stat-value">
+                <span id="statCarbsVal">0</span>
+                <span class="stat-unit" id="statCarbsTarget">/ 210g</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-amber" id="statCarbsProgress" style="width: 0%;"></div>
+              </div>
+              <div class="stat-meta">
+                <span>Complex Glycemic Sources</span>
+                <span>Steady</span>
+              </div>
+            </div>
+
+            <!-- Healthy Fats Card -->
+            <div class="stat-card stat-fats">
+              <div class="stat-top">
+                <span class="stat-label">Healthy Fats</span>
+                <span class="stat-icon">🥑</span>
+              </div>
+              <div class="stat-value">
+                <span id="statFatsVal">0</span>
+                <span class="stat-unit" id="statFatsTarget">/ 60g</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-rose" id="statFatsProgress" style="width: 0%;"></div>
+              </div>
+              <div class="stat-meta">
+                <span>25% Total Caloric Ratio</span>
+                <span>Balanced</span>
+              </div>
+            </div>
+
+            <!-- Hydration Card -->
+            <div class="stat-card stat-water">
+              <div class="stat-top">
+                <span class="stat-label">Hydration</span>
+                <span class="stat-icon">💧</span>
+              </div>
+              <div class="stat-value">
+                <span id="statWaterVal">0.0L</span>
+                <span class="stat-unit" id="statWaterTarget">/ 3.2L</span>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-cyan" id="statWaterProgress" style="width: 0%;"></div>
+              </div>
+              <div class="stat-meta">
+                <span id="statWaterMeta">0% of Daily Goal</span>
+                <span>+250ml quick</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Health Overview Summary Card -->
+          <div class="card" style="margin-bottom:0;">
+            <div class="card-header">
+              <div>
+                <h3 style="font-size:1.05rem;">Health Profile Overview</h3>
+                <p style="font-size:0.8125rem; color:var(--text-muted);">Profile completion and metabolic summary</p>
+              </div>
+              <button type="button" class="btn btn-outline btn-sm" data-nav-target="profile">Edit Profile →</button>
+            </div>
+            <div class="card-body">
+              <div style="margin-bottom:0.75rem;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:0.3rem;">
+                  <span style="font-weight:600; color:var(--text-main);">Profile Completion</span>
+                  <span id="dashProfileCompPct" style="font-weight:700; color:var(--primary-700);">89%</span>
+                </div>
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill bg-emerald" id="dashProfileCompBar" style="width:89%;"></div>
+                </div>
+              </div>
+              <div class="health-overview-grid">
+                <div class="health-overview-item">
+                  <span class="health-overview-label">BMI Status</span>
+                  <span class="health-overview-value" id="dashBmiSummary">BMI 23.4 · Normal</span>
+                </div>
+                <div class="health-overview-item">
+                  <span class="health-overview-label">Primary Goal</span>
+                  <span class="health-overview-value" id="dashGoalSummary">Fat Loss</span>
+                </div>
+                <div class="health-overview-item">
+                  <span class="health-overview-label">Dietary Style</span>
+                  <span class="health-overview-value" id="dashDietSummary">Balanced</span>
+                </div>
+                <div class="health-overview-item">
+                  <span class="health-overview-label">Daily Target</span>
+                  <span class="health-overview-value" id="dashCaloriesSummary">2,150 kcal/day</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Dashboard Split Grid -->
+          <div class="dashboard-grid">
+            
+            <!-- Left Column: Today's Meal Plan Schedule -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 style="font-size:1.15rem;">Today's Meal Schedule</h3>
+                  <p style="font-size:0.8125rem; color:var(--text-muted);">Check off meals as you consume them</p>
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" data-nav-target="mealplan">Full 7-Day Plan →</button>
+              </div>
+              <div class="card-body">
+                <div class="meals-schedule-list" id="todayMealsScheduleList">
+                  <!-- Dynamically Rendered from state/data.js -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Habit Streaks & Daily Scientific Tip -->
+            <div style="display:flex; flex-direction:column; gap:1.25rem;">
+              
+              <!-- Habit Streaks Card -->
+              <div class="card">
+                <div class="card-header">
+                  <h3 style="font-size:1.05rem;">Daily Wellness Streaks</h3>
+                  <span class="badge badge-emerald" id="dashStreakBadge">🔥 0 Day Streak</span>
+                </div>
+                <div class="card-body">
+                  <div class="habit-chips-grid" id="habitChipsGrid">
+                    <!-- Rendered by JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Science Tip Card -->
+              <div class="card" style="background: linear-gradient(135deg, #ffffff, #f0fdf4); border-color: var(--primary-200);">
+                <div class="card-body">
+                  <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                    <span style="font-size:1.25rem;">💡</span>
+                    <h4 style="color:var(--primary-800); font-size:0.9375rem;">NutriAI Science Insight</h4>
+                  </div>
+                  <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6;">
+                    Consuming <strong>30g+ of high-leucine protein</strong> within 45 minutes of resistance training maximizes muscle protein synthesis (MPS) and accelerates recovery.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Weekly Calorie Trends Chart Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 style="font-size:1.15rem;">Weekly Energy Intake vs. Target</h3>
+                <p style="font-size:0.8125rem; color:var(--text-muted);">7-day caloric consistency tracking</p>
+              </div>
+              <span class="badge badge-emerald" id="dashCaloriesBadge">Caloric Intake Tracking</span>
+            </div>
+            <div class="card-body" style="height: 280px; position: relative;">
+              <canvas id="weeklyCaloriesCanvas" style="width:100%; height:100%;"></canvas>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             2. HEALTH PROFILE & BIOMETRICS VIEW
+             ========================================================= -->
+        <section id="view-profile" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Health Profile & Metabolic Calculator</h2>
+              <p>Mifflin-St Jeor metabolic rate, biometric benchmarks, and personalized targets</p>
+            </div>
+          </div>
+
+          <!-- Calculated Metabolic Summary Bar -->
+          <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1.5rem;">
+            
+            <div class="stat-card">
+              <span class="stat-label">Body Mass Index</span>
+              <div class="stat-value" id="profileBmiVal">23.4</div>
+              <span class="badge badge-emerald" id="profileBmiCategory" style="align-self: flex-start;">Normal</span>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Basal Metabolic Rate</span>
+              <div class="stat-value" id="profileBmrVal">1,720 kcal</div>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Mifflin-St Jeor equation</span>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Total Daily Energy (TDEE)</span>
+              <div class="stat-value" id="profileTdeeVal">2,600 kcal</div>
+              <span style="font-size:0.75rem; color:var(--text-muted);">Moderate activity (1.55x)</span>
+            </div>
+
+            <div class="stat-card stat-protein">
+              <span class="stat-label">Daily Calorie Target</span>
+              <div class="stat-value" id="profileTargetCals" style="color:var(--primary-700);">2,150 kcal/day</div>
+              <span style="font-size:0.75rem; color:var(--primary-600); font-weight:600;">-450 kcal deficit</span>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Macro Targets Today</span>
+              <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.25rem; font-size:0.875rem;">
+                <span><span style="color:var(--color-protein); font-weight:700;">P:</span> <span id="profileProteinTarget">155g</span></span>
+                <span><span style="color:var(--color-carbs); font-weight:700;">C:</span> <span id="profileCarbsTarget">210g</span></span>
+                <span><span style="color:var(--color-fats); font-weight:700;">F:</span> <span id="profileFatsTarget">60g</span></span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BMI Visual Scale Gauge -->
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-body" style="padding-bottom:1rem;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="font-size:0.9375rem; font-weight:700; color:var(--text-main);">BMI Scale</span>
+                <span id="bmiScaleLabel" style="font-size:0.9375rem; font-weight:700; color:var(--primary-600);">BMI 23.4 — Normal</span>
+              </div>
+              <div class="bmi-scale">
+                <div class="bmi-zone bmi-underweight">Underweight<br/>&lt;18.5</div>
+                <div class="bmi-zone bmi-normal">Normal<br/>18.5–24.9</div>
+                <div class="bmi-zone bmi-overweight">Overweight<br/>25–29.9</div>
+                <div class="bmi-zone bmi-obese">Obese<br/>≥30</div>
+              </div>
+              <div class="bmi-needle-track">
+                <div class="bmi-needle" id="bmiScaleNeedle"></div>
+              </div>
+              <div class="bmi-scale-labels">
+                <span>10</span><span>18.5</span><span>25</span><span>30</span><span>45+</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile Form Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Biometrics & Lifestyle Settings</h3>
+              <span class="badge badge-gray">Real-Time Calculation</span>
+            </div>
+            <div class="card-body">
+              <form id="healthProfileForm">
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="profName">Full Name</label>
+                    <input type="text" class="form-input" id="profName" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profEmail">Email Address</label>
+                    <input type="email" class="form-input" id="profEmail" required />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="profGender">Biological Gender</label>
+                    <select class="form-select" id="profGender">
+                      <option value="male">Male (BMR +5)</option>
+                      <option value="female">Female (BMR -161)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profAge">Age (years)</label>
+                    <input type="number" class="form-input" id="profAge" min="15" max="100" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profHeight">Height (cm)</label>
+                    <input type="number" class="form-input" id="profHeight" min="100" max="230" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profWeight">Current Weight (kg)</label>
+                    <input type="number" class="form-input" id="profWeight" step="0.1" min="30" max="250" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profTargetWeight">Target Goal Weight (kg)</label>
+                    <input type="number" class="form-input" id="profTargetWeight" step="0.1" />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="profActivity">Activity Level</label>
+                    <select class="form-select" id="profActivity">
+                      <option value="sedentary">Sedentary (Desk job, little exercise)</option>
+                      <option value="light">Light Activity (1-3 days/week exercise)</option>
+                      <option value="moderate">Moderate Activity (3-5 days/week workouts)</option>
+                      <option value="high">High Activity (6-7 days/week intense training)</option>
+                      <option value="athlete">Athlete / Very High (2x day training)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profGoal">Primary Wellness Goal</label>
+                    <select class="form-select" id="profGoal">
+                      <option value="balanced_nutrition">Balanced Nutrition</option>
+                      <option value="general_fitness">General Fitness</option>
+                      <option value="muscle_strength">Muscle & Strength Support</option>
+                      <option value="weight_management">Weight Management</option>
+                      <option value="healthy_lifestyle">Healthy Lifestyle</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="profDiet">Dietary Style & Philosophy</label>
+                    <select class="form-select" id="profDiet">
+                      <option value="balanced">Non-Vegetarian (Balanced Omnivore)</option>
+                      <option value="vegetarian">Vegetarian (Lacto-Ovo)</option>
+                      <option value="eggetarian">Eggetarian (Vegetarian + Eggs)</option>
+                      <option value="pescatarian">Pescatarian (Fish & Plant-based)</option>
+                      <option value="vegan">Vegan (100% Plant-Based)</option>
+                      <option value="keto">Ketogenic (Low Carb, High Fat)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- New Fields: Lifestyle -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="profSleep">Sleep Target (hours/night)</label>
+                    <input type="number" class="form-input" id="profSleep" step="0.5" min="4" max="12" placeholder="7.5" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profExerciseFreq">Exercise Frequency</label>
+                    <select class="form-select" id="profExerciseFreq">
+                      <option value="0">No exercise</option>
+                      <option value="1_2">1-2 days/week</option>
+                      <option value="3_5">3-5 days/week</option>
+                      <option value="6_7">6-7 days/week</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profMealFreq">Meals Per Day</label>
+                    <select class="form-select" id="profMealFreq">
+                      <option value="2">2 meals</option>
+                      <option value="3">3 meals</option>
+                      <option value="4">4 meals (recommended)</option>
+                      <option value="5">5 meals</option>
+                      <option value="6">6 meals</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profCuisine">Cuisine Preference</label>
+                    <select class="form-select" id="profCuisine">
+                      <option value="mediterranean">Mediterranean</option>
+                      <option value="asian">Asian</option>
+                      <option value="american">American</option>
+                      <option value="indian">Indian / South Asian</option>
+                      <option value="mixed">Mixed / No Preference</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Dietary Restrictions -->
+                <div class="form-group">
+                  <label class="form-label">Dietary Restrictions & Allergens</label>
+                  <div class="restrictions-grid">
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="dairy" />
+                      <span>🥛 Dairy Free</span>
+                    </label>
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="gluten" />
+                      <span>🌾 Gluten Free</span>
+                    </label>
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="nuts" />
+                      <span>🥜 Nut Free</span>
+                    </label>
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="soy" />
+                      <span>🫘 Soy Free</span>
+                    </label>
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="eggs" />
+                      <span>🥚 Egg Free</span>
+                    </label>
+                    <label class="restriction-chip">
+                      <input type="checkbox" name="profileRestriction" value="fish" />
+                      <span>🐟 Fish Free</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Profile Completion Indicator -->
+                <div style="margin-top:1.25rem; padding:1rem; background:var(--bg-surface-subtle); border-radius:var(--radius-md);">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <span style="font-size:0.875rem; font-weight:600; color:var(--text-main);">Profile Completion</span>
+                    <span id="profileCompletionPct" style="font-size:0.875rem; font-weight:700; color:var(--primary-700);">0%</span>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill bg-emerald" id="profileCompletionBar" style="width:0%;"></div>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem;">
+                  <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save & Recalculate Targets ✓</button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             3. 7-DAY MEAL PLANNER VIEW
+             ========================================================= -->
+        <section id="view-mealplan" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>7-Day Personalized Meal Plan</h2>
+              <p>Tailored macro-balanced recipes with automated ingredient grocery list</p>
+            </div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <button type="button" class="btn btn-primary" onclick="NutriAIApp.openModal('modalCustomMealPlan')">
+                <span>✨</span> AI Custom Plan Generator
+              </button>
+              <button type="button" class="btn btn-outline" id="copyGroceryBtn">
+                <span>🛒</span> Copy Smart Grocery List
+              </button>
+            </div>
+          </div>
+
+          <!-- Day Tabs Selector Bar (Mon - Sun) -->
+          <div class="day-selector-bar" id="mealPlanDaySelector">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Meal Cards Grid -->
+          <div class="meal-plan-grid" id="mealPlanCardsGrid">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Smart Grocery List Breakdown Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 style="font-size:1.15rem;">Automated Smart Grocery List</h3>
+                <p style="font-size:0.8125rem; color:var(--text-muted);">Consolidated weekly ingredients organized by grocery aisles</p>
+              </div>
+              <span class="badge badge-emerald">Ready for Shopping</span>
+            </div>
+            <div class="card-body" id="groceryListContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             4. NUTRITION & FOOD TRACKER VIEW
+             ========================================================= -->
+        <section id="view-nutrition" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Nutrition & Food Log</h2>
+              <p>Track macronutrient distributions, calories budget, and custom foods</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="NutriAIApp.openModal('modalAddFood')">
+              <span>+</span> Log Food Item
+            </button>
+          </div>
+
+          <div class="dashboard-grid">
+            
+            <!-- Left: Today's Food Logs Timeline -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Today's Food Journal</h3>
+                <span class="badge badge-emerald" id="nutritionSummaryCals">680 / 2150 kcal</span>
+              </div>
+              <div class="card-body">
+                <div id="todayFoodLogsList">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Macronutrient Summary -->
+            <div class="card">
+              <div class="card-header">
+                <h3>Macro Ratio Split</h3>
+                <span class="badge badge-blue" id="nutritionRemainingCals">Remaining</span>
+              </div>
+              <div class="card-body">
+                <div style="width:200px; height:200px; position:relative; margin:0 auto 1rem;">
+                  <canvas id="macroDonutCanvas" style="width:100%; height:100%;"></canvas>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.625rem; font-size:0.875rem;">
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+                      <span style="color:var(--color-protein); font-weight:700;">● Protein</span>
+                      <span id="nutritionSummaryProtein">46g / 155g</span>
+                    </div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill bg-blue" id="nutProteinBar" style="width:30%;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+                      <span style="color:var(--color-carbs); font-weight:700;">● Carbohydrates</span>
+                      <span id="nutritionSummaryCarbs">62g / 210g</span>
+                    </div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill bg-amber" id="nutCarbsBar" style="width:30%;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+                      <span style="color:var(--color-fats); font-weight:700;">● Healthy Fats</span>
+                      <span id="nutritionSummaryFats">26g / 60g</span>
+                    </div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill bg-rose" id="nutFatsBar" style="width:43%;"></div></div>
+                  </div>
+                  <div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.2rem;">
+                      <span style="color:#16a34a; font-weight:700;">● Dietary Fiber</span>
+                      <span id="nutritionSummaryFiber">9g / 32g</span>
+                    </div>
+                    <div class="progress-bar-container"><div class="progress-bar-fill" id="nutFiberBar" style="width:28%; background:#16a34a;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             5. WELLNESS & HABIT PROGRESS VIEW
+             ========================================================= -->
+        <section id="view-wellness" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Wellness, Sleep & Weight Milestones</h2>
+              <p>Monitor physiological metrics, hydration, and body composition changes</p>
+            </div>
+          </div>
+
+          <div class="stats-grid" style="margin-bottom:1.5rem;">
+            
+            <div class="stat-card stat-water">
+              <span class="stat-label">Hydration Today</span>
+              <div class="stat-value" id="wellnessWaterDisplay">2.3 L / 3.2 L</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill bg-cyan" id="wellnessWaterProgBar" style="width:70%;"></div>
+              </div>
+              <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline btn-sm" data-water-add="250">+250ml</button>
+                <button type="button" class="btn btn-outline btn-sm" data-water-add="500">+500ml</button>
+                <button type="button" class="btn btn-outline btn-sm" data-water-add="750">+750ml</button>
+                <button type="button" class="btn btn-outline btn-sm" data-water-add="1000">+1L</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="waterResetBtn" style="color:var(--text-muted);">Reset</button>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <span class="stat-label">Sleep & Recovery</span>
+              <div class="stat-value" id="wellnessSleepDisplay">7.8 hrs</div>
+              <div class="stat-meta">
+                <span>Recovery Score: 88 (Optimal)</span>
+                <span>🌙 Deep Sleep 2.1h</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-protein">
+              <span class="stat-label">Current Weight</span>
+              <div class="stat-value" id="wellnessCurrentWeight">74.2 kg</div>
+              <div class="stat-meta">
+                <span id="wellnessWeightChange" style="color:var(--primary-600);">-3.6 kg since start</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Water Glasses Visual -->
+          <div class="card" style="margin-bottom:1.5rem;">
+            <div class="card-header">
+              <h3 style="font-size:1.05rem;">💧 Hydration Goal Tracker</h3>
+              <span class="badge badge-cyan">8 glasses = full target</span>
+            </div>
+            <div class="card-body">
+              <div class="water-glasses-grid" id="waterGlassesGrid">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Weight Progress Canvas Chart -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3>Body Weight Trajectory</h3>
+                <p style="font-size:0.8125rem; color:var(--text-muted);">Weekly weigh-in progress towards target goal</p>
+              </div>
+              <span class="badge badge-emerald">On Schedule</span>
+            </div>
+            <div class="card-body" style="height: 280px;">
+              <canvas id="weightProgressCanvas" style="width:100%; height:100%;"></canvas>
+            </div>
+          </div>
+
+          <!-- Log New Weight Entry -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size:1.05rem;">⚖️ Log New Weight Entry</h3>
+              <span class="badge badge-gray">Updates your progress chart</span>
+            </div>
+            <div class="card-body">
+              <form id="weightLogForm">
+                <div class="form-row" style="align-items:flex-end;">
+                  <div class="form-group" style="flex:1;">
+                    <label class="form-label" for="weightLogInput">Body Weight (kg)</label>
+                    <input type="number" class="form-input" id="weightLogInput" step="0.1" min="30" max="300" placeholder="e.g. 74.0" required />
+                  </div>
+                  <div class="form-group" style="flex:2;">
+                    <label class="form-label" for="weightLogNote">Note (optional)</label>
+                    <input type="text" class="form-input" id="weightLogNote" placeholder="e.g. After morning workout" maxlength="60" />
+                  </div>
+                  <div class="form-group" style="flex:0;">
+                    <button type="submit" class="btn btn-primary">Log Weight</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             6. BIOMARKERS & LABS (PREVIEW SECTION)
+             ========================================================= -->
+        <section id="view-biomarkers" class="view-section">
+          
+          <div class="banner-preview">
+            <div class="banner-preview-text">
+              <h3>🧬 Laboratory Panel & Biomarker Sync Hub</h3>
+              <p>Connect clinical lab results to correlate micronutrients, lipid particles, and metabolic health with your nutrition plan.</p>
+            </div>
+            <span class="badge badge-preview">Demo Panel Data</span>
+          </div>
+
+          <div class="lab-panels-grid" id="biomarkersPreviewGrid">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="card" style="margin-top:1.5rem; text-align:center; padding:2rem;">
+            <h3 style="font-size:1.15rem; margin-bottom:0.5rem;">Seamless Lab Integration (Quest / LabCorp / PDF Upload)</h3>
+            <p style="font-size:0.875rem; color:var(--text-muted); max-width:600px; margin:0 auto 1.25rem;">
+              The biomarker sync module allows automated extraction of metabolic blood panels to refine your micronutrient recommendations.
+            </p>
+            <button type="button" class="btn btn-secondary" onclick="NutriAIApp.showToast('Lab sync integrations will connect in the upcoming release!', 'info')">
+              Connect Diagnostic Provider (Coming Soon)
+            </button>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             7. GENETIC INSIGHTS (PREVIEW SECTION)
+             ========================================================= -->
+        <section id="view-genetics" class="view-section">
+          
+          <div class="banner-preview">
+            <div class="banner-preview-text">
+              <h3>🔬 Nutrigenomics & Metabolic Predispositions</h3>
+              <p>Explore how genetic variations influence macronutrient metabolism, caffeine clearance, and micronutrient absorption.</p>
+            </div>
+            <span class="badge badge-preview">Educational Preview</span>
+          </div>
+
+          <div id="geneticsPreviewGrid">
+            <!-- Rendered by JS -->
+          </div>
+
+        </section>
+
+        </section>
+
+        <!-- =========================================================
+             8. AI NUTRITIONIST LIVE CHAT VIEW
+             ========================================================= -->
+        <section id="view-ai-chat" class="view-section">
+          
+          <div class="ai-chat-container">
+            <div class="ai-chat-header">
+              <div style="display:flex; align-items:center; gap:0.75rem;">
+                <div class="chat-avatar chat-avatar-ai">🤖</div>
+                <div>
+                  <div style="font-weight:700; color:var(--text-main); font-size:0.9375rem;">NutriAI Personal Dietitian Assistant</div>
+                  <div style="font-size:0.75rem; color:var(--primary-700);" id="aiStatusIndicator">● Powered by Google Gemini AI · Biometric-grounded</div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="NutriAIApp.clearChatHistory()" title="Clear chat history">Clear Chat</button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div class="ai-chat-messages" id="aiChatMessages">
+              <!-- Initial Welcome Bubble -->
+              <div class="chat-bubble chat-bubble-ai">
+                <div class="chat-avatar chat-avatar-ai">🥗</div>
+                <div class="chat-content">
+                  <div style="font-weight:700; margin-bottom:0.25rem; color:#047857;">Hello! I am your NutriAI Clinical Nutritionist.</div>
+                  I am connected directly to your active health profile and today's food log. Ask me anything about meal ideas, post-workout snacks, micronutrient targets, or ingredient substitutions!
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="chat-prompt-suggestions">
+              <span class="chat-prompt-chip" onclick="NutriAIApp.sendQuickPrompt('What should I eat for dinner with 40g protein and under 500 kcal?')">🥩 Dinner with 40g Protein</span>
+              <span class="chat-prompt-chip" onclick="NutriAIApp.sendQuickPrompt('How should I adjust my macros on my workout days?')">🏋️ Workout Day Macros</span>
+              <span class="chat-prompt-chip" onclick="NutriAIApp.sendQuickPrompt('Give me 3 high-fiber snack ideas for my diet')">🥦 High-Fiber Snacks</span>
+              <span class="chat-prompt-chip" onclick="NutriAIApp.sendQuickPrompt('Analyze my remaining calorie and macro budget for today')">📊 Analyze Today's Budget</span>
+            </div>
+
+            <!-- Chat Input Bar -->
+            <form id="aiChatForm" class="ai-chat-input-bar">
+              <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Ask your AI dietitian anything (e.g. meal ideas, macro swaps)..." required autocomplete="off" />
+              <button type="submit" class="btn btn-primary" id="aiChatSendBtn">
+                <span>Send</span> <span>➤</span>
+              </button>
+            </form>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             8B. AI RECOMMENDATIONS (PREVIEW SECTION)
+             ========================================================= -->
+        <section id="view-ai-insights" class="view-section">
+          
+          <div class="banner-preview">
+            <div class="banner-preview-text">
+              <h3>✨ NutriAI Intelligent Recommendations Engine</h3>
+              <p>Evidence-grounded suggestions based on your biometric progress and metabolic targets.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" data-nav-target="ai-chat">
+              💬 Launch AI Nutritionist Chat
+            </button>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:1rem;">
+            
+            <div class="card card-body">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span class="badge badge-emerald">Protein Pacing</span>
+                <span class="badge badge-gray">Confidence: High</span>
+              </div>
+              <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">Distribute Protein Across 4 Feedings</h3>
+              <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6;">
+                Aim for ~38g of high-quality protein per meal (Breakfast, Lunch, Afternoon Snack, Dinner) to maintain steady muscle protein synthesis throughout the day.
+              </p>
+            </div>
+
+            <div class="card card-body">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span class="badge badge-amber">Carb Timing</span>
+                <span class="badge badge-gray">Workout Correlation</span>
+              </div>
+              <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">Target 60% of Daily Carbohydrates Around Training Window</h3>
+              <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6;">
+                Placing complex carbohydrates (e.g. rolled oats, quinoa, sweet potatoes) 90 minutes pre-workout and immediately post-workout optimizes glycogen resynthesis.
+              </p>
+            </div>
+
+            <div class="card card-body">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span class="badge badge-cyan">Hydration Protocol</span>
+                <span class="badge badge-gray">Electrolyte Balance</span>
+              </div>
+              <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">Increase Morning Hydration to 750ml</h3>
+              <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6;">
+                Drinking 750ml of water with a pinch of unrefined mineral salt upon waking rapidly rehydrates cellular tissues and jumpstarts metabolic alert systems.
+              </p>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             9. INSIGHTS & REPORTS (PREVIEW SECTION)
+             ========================================================= -->
+        <section id="view-reports" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Metabolic Health & Weekly Digest Reports</h2>
+              <p>Download comprehensive nutritional summaries and macro compliance reports</p>
+            </div>
+          </div>
+
+          <div class="card" style="padding:2rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+              <div>
+                <span class="badge badge-emerald" style="margin-bottom:0.5rem;">Clinical Digest</span>
+                <h3 style="font-size:1.25rem; margin-bottom:0.35rem;">Weekly Nutritional Compliance Summary</h3>
+                <p style="font-size:0.875rem; color:var(--text-muted);">Printable clinical digest with metabolic benchmarks and trajectory</p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="NutriAIReportService.generateAndDownloadReport()">
+                📄 Export Clinical PDF Report
+              </button>
+            </div>
+
+            <hr style="border:0; border-top:1px solid var(--border-light); margin:1.5rem 0;" />
+
+            <div class="form-row">
+              <div style="background:var(--bg-surface-subtle); padding:1rem; border-radius:var(--radius-md);">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">AVERAGE DAILY CALORIES</div>
+                <div style="font-size:1.35rem; font-weight:800; color:var(--text-main); margin-top:0.25rem;">2,142 kcal</div>
+                <div style="font-size:0.8125rem; color:var(--color-success); font-weight:600;">99.6% Goal Adherence</div>
+              </div>
+
+              <div style="background:var(--bg-surface-subtle); padding:1rem; border-radius:var(--radius-md);">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">AVERAGE PROTEIN INTAKE</div>
+                <div style="font-size:1.35rem; font-weight:800; color:var(--text-main); margin-top:0.25rem;">158 g/day</div>
+                <div style="font-size:0.8125rem; color:var(--color-success); font-weight:600;">Target Met</div>
+              </div>
+
+              <div style="background:var(--bg-surface-subtle); padding:1rem; border-radius:var(--radius-md);">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">BODY WEIGHT DELTA</div>
+                <div style="font-size:1.35rem; font-weight:800; color:var(--text-main); margin-top:0.25rem;">-0.6 kg</div>
+                <div style="font-size:0.8125rem; color:var(--primary-700); font-weight:600;">Sustainable Fat Loss Rate</div>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             10. SPECIALIST NETWORK (PREVIEW SECTION)
+             ========================================================= -->
+        <section id="view-specialists" class="view-section">
+          
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Specialist & Clinical Dietitian Network</h2>
+              <p>Connect with board-certified sports dietitians, metabolic coaches, and nutritionist experts</p>
+            </div>
+          </div>
+
+          <div class="specialists-grid" id="specialistsDirectoryGrid">
+            <!-- Rendered by JS -->
+          </div>
+
+        </section>
+
+        <!-- =========================================================
+             11. SETTINGS VIEW
+             ========================================================= -->
+        <section id="view-settings" class="view-section">
+
+          <div class="page-header">
+            <div class="page-header-text">
+              <h2>Settings & Preferences</h2>
+              <p>App configuration, data management, and account options</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:1.25rem; max-width:720px;">
+
+            <!-- Account Summary -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size:1.05rem;">👤 Account</h3>
+              </div>
+              <div class="card-body">
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+                  <div class="avatar" style="width:52px; height:52px; font-size:1.25rem;" id="sidebarAvatar2">A</div>
+                  <div>
+                    <div style="font-weight:700; color:var(--text-main);" id="settingsProfileName">Alex Morgan</div>
+                    <div style="font-size:0.8125rem; color:var(--text-muted);">Demo Account · <span id="settingsDietDisplay">Balanced</span> diet · Goal: <span id="settingsGoalDisplay">fat_loss</span></div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                  <button type="button" class="btn btn-outline btn-sm" data-nav-target="profile">Edit Health Profile</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn2" onclick="appState.logout(); NutriAIApp.showToast('Signed out.', 'info');">Sign Out</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Google Gemini AI Engine Configuration Card -->
+            <div class="card" style="border-color:var(--primary-300);">
+              <div class="card-header" style="background:#f0fdf4;">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span style="font-size:1.25rem;">✨</span>
+                  <h3 style="font-size:1.05rem; color:var(--primary-900);">Google Gemini AI Configuration</h3>
+                </div>
+                <span class="badge badge-emerald" id="apiKeyStatusBadge">API Key Ready</span>
+              </div>
+              <div class="card-body">
+                <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6; margin-bottom:1rem;">
+                  NutriAI integrates with Google Gemini 1.5/2.0 Flash to power your personalized AI Dietitian, food photo scanner, and custom meal planning. Get a free API key with zero setup from <strong>Google AI Studio</strong>.
+                </p>
+                <form id="geminiApiKeyForm">
+                  <div class="form-group">
+                    <label class="form-label" for="geminiApiKeyInput">Google Gemini API Key</label>
+                    <div style="display:flex; gap:0.5rem;">
+                      <input type="password" class="form-input" id="geminiApiKeyInput" placeholder="AIzaSy..." />
+                      <button type="submit" class="btn btn-primary" id="saveApiKeyBtn">Save Key</button>
+                      <button type="button" class="btn btn-outline" id="clearApiKeyBtn">Clear</button>
+                    </div>
+                  </div>
+                </form>
+                <div style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.5rem;">
+                  👉 <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--primary-700); font-weight:700; text-decoration:underline;">Click here to get your free Gemini API key from Google AI Studio</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supabase Cloud Sync Card -->
+            <div class="card">
+              <div class="card-header">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                  <span style="font-size:1.25rem;">☁️</span>
+                  <h3 style="font-size:1.05rem;">Supabase Cloud Database & Auth</h3>
+                </div>
+                <span class="badge badge-gray" id="supabaseStatusBadge">Local Mode</span>
+              </div>
+              <div class="card-body">
+                <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6; margin-bottom:1rem;">
+                  Connect your own free Supabase PostgreSQL project to sync meal logs, weights, and biometrics across all your devices with row-level security.
+                </p>
+                <form id="supabaseConfigForm">
+                  <div class="form-group">
+                    <label class="form-label" for="supabaseUrlInput">Supabase Project URL</label>
+                    <input type="text" class="form-input" id="supabaseUrlInput" placeholder="https://your-project.supabase.co" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="supabaseAnonKeyInput">Supabase Anon Public Key</label>
+                    <input type="password" class="form-input" id="supabaseAnonKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+                  </div>
+                  <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:0.75rem;">
+                    <button type="submit" class="btn btn-primary btn-sm">Connect Supabase</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Measurement Units -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size:1.05rem;">📏 Measurement Units</h3>
+                <span class="badge badge-preview">Coming Soon</span>
+              </div>
+              <div class="card-body">
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; opacity:0.6; pointer-events:none;">
+                  <button type="button" class="btn btn-primary btn-sm">Metric (kg, cm)</button>
+                  <button type="button" class="btn btn-outline btn-sm">Imperial (lbs, ft)</button>
+                </div>
+                <p style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.5rem;">Unit conversion will be available in the next release.</p>
+              </div>
+            </div>
+
+            <!-- Dedicated Backend Server Connection -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 style="font-size:1.05rem;">📡 Dedicated Backend API Server</h3>
+                  <p style="font-size:0.8125rem; color:var(--text-muted);">Connect to local Python/Flask server or 24/7 Cloud URL</p>
+                </div>
+                <span class="badge badge-emerald" id="backendStatusBadge">Live Cloud 24/7 🟢</span>
+              </div>
+              <div class="card-body">
+                <form id="backendConfigForm">
+                  <div class="form-group" style="margin-bottom:0.75rem;">
+                    <label class="form-label" for="backendUrlInput">API Base URL</label>
+                    <input type="url" class="form-input" id="backendUrlInput" placeholder="https://nutriai-backend-y91i.onrender.com/api" value="https://nutriai-backend-y91i.onrender.com/api" />
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">
+                      Running 24/7 on Render Cloud (or switch to <code>http://localhost:5000/api</code> for local).
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                    <button type="button" class="btn btn-ghost btn-sm" id="testBackendBtn">Test Connection</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save & Connect</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size:1.05rem;">🗄️ Data Management</h3>
+              </div>
+              <div class="card-body" style="display:flex; flex-direction:column; gap:0.75rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; background:var(--bg-surface-subtle); border-radius:var(--radius-sm);">
+                  <div>
+                    <div style="font-weight:600; color:var(--text-main); font-size:0.9375rem;">Export Profile Data</div>
+                    <div style="font-size:0.8125rem; color:var(--text-muted);">Download your profile and logs as JSON</div>
+                  </div>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="const d=JSON.stringify(appState.data,null,2); const b=new Blob([d],{type:'application/json'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='nutriai_profile_export.json'; a.click(); URL.revokeObjectURL(u); NutriAIApp.showToast('Profile exported!','success');">Export JSON</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem; background:var(--bg-surface-subtle); border-radius:var(--radius-sm);">
+                  <div>
+                    <div style="font-weight:600; color:var(--text-main); font-size:0.9375rem;">Reset to Demo Data</div>
+                    <div style="font-size:0.8125rem; color:var(--text-muted);">Clear all customizations and restore defaults</div>
+                  </div>
+                  <button type="button" class="btn btn-ghost btn-sm" id="resetDemoDataBtn" style="color:var(--color-danger);">Reset</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="card">
+              <div class="card-header">
+                <h3 style="font-size:1.05rem;">🛡️ Privacy & Data</h3>
+              </div>
+              <div class="card-body">
+                <p style="font-size:0.875rem; color:var(--text-body); line-height:1.7; margin:0;">
+                  <strong>NutriAI Demo — No data leaves your browser.</strong> All profile data, meal logs, weight history, and wellness records are stored exclusively in your browser's <code>localStorage</code>. No data is transmitted to any server. This is a frontend-only demo application intended for college project demonstration and personal use.
+                </p>
+                <div style="margin-top:0.75rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+                  <span class="badge badge-emerald">100% Client-Side</span>
+                  <span class="badge badge-gray">No Backend Storage</span>
+                  <span class="badge badge-gray">No Cookies</span>
+                  <span class="badge badge-gray">localStorage Only</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
   </div>
+
+  <!-- =========================================================
+       MODALS
+       ========================================================= -->
+
+  <!-- 1. LOGIN MODAL -->
+  <div class="modal-backdrop" id="modalAuthLogin">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>🥗</span> NutriAI Sign In</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:var(--primary-50); border:1px solid var(--primary-200); border-radius:var(--radius-md); padding:0.875rem; margin-bottom:1.25rem;">
+          <div style="font-size:0.875rem; font-weight:700; color:var(--primary-900);">Quick Demo Access</div>
+          <div style="font-size:0.8125rem; color:var(--primary-800); margin-top:0.25rem;">
+            Click below to instantly log in as our demo user (Alex Morgan).
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="demoLoginBtn" style="margin-top:0.625rem; width:100%;">
+            ⚡ Instant Demo Login
+          </button>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn btn-secondary" style="width:100%; margin-top:0.5rem;">Sign In</button>
+        </form>
+
+        <div style="margin-top:1.25rem; text-align:center; font-size:0.875rem; color:var(--text-muted);">
+          Don't have an account? <a href="#" id="switchToSignup" style="font-weight:700;">Sign up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. SIGN UP 3-STEP ONBOARDING WIZARD MODAL -->
+  <div class="modal-backdrop" id="modalAuthSignup">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>🥗</span> Join NutriAI — Personalized Onboarding</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- 3-Step Progress Indicator -->
+        <div class="wizard-header" id="wizardProgressHeader">
+          <div class="wizard-steps-indicator">
+            <div class="wizard-step active" id="wizardStepIndicator1">
+              <span class="wizard-step-num">1</span>
+              <span class="wizard-step-label">Account</span>
+            </div>
+            <div class="wizard-step-line" id="wizardLine1"></div>
+            <div class="wizard-step" id="wizardStepIndicator2">
+              <span class="wizard-step-num">2</span>
+              <span class="wizard-step-label">Biometrics</span>
+            </div>
+            <div class="wizard-step-line" id="wizardLine2"></div>
+            <div class="wizard-step" id="wizardStepIndicator3">
+              <span class="wizard-step-num">3</span>
+              <span class="wizard-step-label">Lifestyle & Diet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 1: ACCOUNT -->
+        <div class="wizard-step-pane" id="wizardStepPane1">
+          <div class="wizard-pane-title">Step 1 — Create Your Account</div>
+          <p class="wizard-pane-desc">Set up your secure credentials to get started.</p>
+
+          <div class="wizard-error-alert" id="wizardError1" style="display:none;"></div>
+
+          <div class="form-group">
+            <label class="form-label" for="wizardName">Full Name <span style="color:#ef4444;">*</span></label>
+            <input type="text" class="form-input" id="wizardName" placeholder="e.g. Jordan Smith" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wizardEmail">Email Address <span style="color:#ef4444;">*</span></label>
+            <input type="email" class="form-input" id="wizardEmail" placeholder="you@example.com" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardPassword">Password (6+ chars) <span style="color:#ef4444;">*</span></label>
+              <input type="password" class="form-input" id="wizardPassword" placeholder="••••••••" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardPasswordConfirm">Confirm Password <span style="color:#ef4444;">*</span></label>
+              <input type="password" class="form-input" id="wizardPasswordConfirm" placeholder="••••••••" required />
+            </div>
+          </div>
+
+          <div class="wizard-btn-row">
+            <button type="button" class="btn btn-ghost" id="switchToLogin">Already have an account? Sign in</button>
+            <button type="button" class="btn btn-primary" id="btnWizardNext1">Continue to Biometrics →</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: BIOMETRICS -->
+        <div class="wizard-step-pane" id="wizardStepPane2" style="display:none;">
+          <div class="wizard-pane-title">Step 2 — Essential Biometrics</div>
+          <p class="wizard-pane-desc">Used for scientifically accurate Mifflin-St Jeor metabolic rate and BMI calculation.</p>
+
+          <div class="wizard-error-alert" id="wizardError2" style="display:none;"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardAge">Age (years) <span style="color:#ef4444;">*</span></label>
+              <input type="number" class="form-input" id="wizardAge" min="14" max="100" placeholder="e.g. 25" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardSex">Biological Sex <span style="color:#ef4444;">*</span></label>
+              <select class="form-select" id="wizardSex" required>
+                <option value="male">Male (BMR +5)</option>
+                <option value="female">Female (BMR -161)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardHeight">Height (cm) <span style="color:#ef4444;">*</span></label>
+              <input type="number" class="form-input" id="wizardHeight" min="100" max="250" placeholder="e.g. 175" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardWeight">Current Weight (kg) <span style="color:#ef4444;">*</span></label>
+              <input type="number" class="form-input" id="wizardWeight" step="0.1" min="30" max="300" placeholder="e.g. 70.0" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardTargetWeight">Target Weight (kg) <span class="text-muted" style="font-weight:normal;">(Optional)</span></label>
+              <input type="number" class="form-input" id="wizardTargetWeight" step="0.1" min="30" max="300" placeholder="e.g. 68.0" />
+            </div>
+          </div>
+
+          <div class="wizard-btn-row">
+            <button type="button" class="btn btn-secondary" id="btnWizardBack2">← Back to Account</button>
+            <button type="button" class="btn btn-primary" id="btnWizardNext2">Continue to Lifestyle →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: LIFESTYLE & NUTRITION -->
+        <div class="wizard-step-pane" id="wizardStepPane3" style="display:none;">
+          <div class="wizard-pane-title">Step 3 — Lifestyle & Nutrition Philosophy</div>
+          <p class="wizard-pane-desc">Tailor your daily meal schedule, energy budget, and recipe preferences.</p>
+
+          <div class="wizard-error-alert" id="wizardError3" style="display:none;"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardActivity">Activity Level</label>
+              <select class="form-select" id="wizardActivity">
+                <option value="sedentary">Sedentary (Desk job, little exercise)</option>
+                <option value="light">Lightly Active (1–3 days/week exercise)</option>
+                <option value="moderate" selected>Moderately Active (3–5 days/week exercise)</option>
+                <option value="high">Very Active (6–7 days/week hard exercise)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardExerciseFreq">Exercise Frequency</label>
+              <select class="form-select" id="wizardExerciseFreq">
+                <option value="0">Rarely</option>
+                <option value="1_2">1–2 days/week</option>
+                <option value="3_5" selected>3–5 days/week</option>
+                <option value="6_7">6–7 days/week</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardSleep">Sleep Duration (hours/night)</label>
+              <input type="number" class="form-input" id="wizardSleep" step="0.5" min="4" max="12" value="7.5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardMealFreq">Meals Per Day</label>
+              <select class="form-select" id="wizardMealFreq">
+                <option value="2">2 meals</option>
+                <option value="3">3 meals</option>
+                <option value="4" selected>4 meals (recommended)</option>
+                <option value="5">5 meals</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="wizardDiet">Dietary Style</label>
+              <select class="form-select" id="wizardDiet">
+                <option value="vegetarian">Vegetarian (Lacto-Ovo)</option>
+                <option value="balanced" selected>Non-Vegetarian (Balanced Omnivore)</option>
+                <option value="vegan">Vegan (100% Plant-Based)</option>
+                <option value="eggetarian">Eggetarian (Vegetarian + Eggs)</option>
+                <option value="pescatarian">Pescatarian (Fish & Plant-based)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wizardCuisine">Cuisine Preference</label>
+              <select class="form-select" id="wizardCuisine">
+                <option value="indian" selected>Indian / South Asian</option>
+                <option value="asian">Asian</option>
+                <option value="mediterranean">Mediterranean</option>
+                <option value="american">American</option>
+                <option value="mixed">Mixed / No Preference</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wizardGoal">Primary Wellness Goal</label>
+            <select class="form-select" id="wizardGoal">
+              <option value="balanced_nutrition" selected>Balanced Nutrition</option>
+              <option value="general_fitness">General Fitness</option>
+              <option value="muscle_strength">Muscle & Strength Support</option>
+              <option value="weight_management">Weight Management</option>
+              <option value="healthy_lifestyle">Healthy Lifestyle</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Dietary Restrictions & Allergies</label>
+            <div class="restrictions-grid">
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="dairy" /> <span>🥛 Dairy</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="gluten" /> <span>🌾 Gluten</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="nuts" /> <span>🥜 Nuts</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="soy" /> <span>🫘 Soy</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="eggs" /> <span>🥚 Eggs</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="fish" /> <span>🐟 Fish</span></label>
+              <label class="restriction-chip"><input type="checkbox" name="wizardRestriction" value="other" /> <span>Other</span></label>
+            </div>
+          </div>
+
+          <div class="wizard-btn-row">
+            <button type="button" class="btn btn-secondary" id="btnWizardBack3">← Back to Biometrics</button>
+            <button type="button" class="btn btn-primary" id="btnWizardSubmit">Save & Create Profile ✓</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: SUCCESS SUMMARY -->
+        <div class="wizard-step-pane" id="wizardStepPaneSuccess" style="display:none; text-align:center;">
+          <div style="font-size:2.5rem; margin-bottom:0.5rem;">🎉</div>
+          <h3 style="color:var(--primary-800); font-size:1.35rem; margin-bottom:0.25rem;">✅ Your NutriAI profile is ready</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.25rem;">
+            Your personalized metabolic targets, BMI benchmarks, and meal schedules have been calculated.
+          </p>
+
+          <div class="wizard-summary-card" id="wizardSummaryCard">
+            <!-- Dynamically populated summary: Name, Age, Height, Weight, BMI, Activity, Diet, Goal -->
+          </div>
+
+          <button type="button" class="btn btn-primary btn-lg" id="btnWizardGoDashboard" style="width:100%; margin-top:1.25rem;">
+            Go to Dashboard →
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ADD FOOD LOG MODAL WITH AI SCANNER -->
+  <div class="modal-backdrop" id="modalAddFood">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>🍽</span> Log Food & AI Photo Scanner</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- AI Photo Scanner Dropzone -->
+        <div class="photo-scanner-dropzone" id="foodPhotoDropzone">
+          <div class="scanner-badge-ai">⚡ AI Vision Macro Scanner</div>
+          <div id="dropzonePromptText">
+            <div style="font-size:1.75rem; margin-bottom:0.25rem;">📸</div>
+            <div style="font-weight:700; color:var(--text-main); font-size:0.875rem;">Take or Upload Food Photo</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">AI calculates calories, protein, carbs & fats automatically</div>
+          </div>
+          <input type="file" id="foodPhotoFileInput" accept="image/*" style="display:none;" />
+          <img id="foodPhotoPreview" class="photo-preview-thumb" style="display:none;" alt="Food Preview" />
+          <div id="foodScanLoading" style="display:none; margin-top:0.5rem; font-size:0.8125rem; color:var(--primary-700); font-weight:700;">
+            ⏳ Analyzing meal with Gemini Vision AI...
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="foodDbSelect">Or Search Pre-loaded Database</label>
+          <select class="form-select" id="foodDbSelect">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <form id="addFoodForm">
+          <div class="form-group">
+            <label class="form-label" for="foodNameInput">Food / Meal Item Name</label>
+            <input type="text" class="form-input" id="foodNameInput" placeholder="e.g. Grilled Chicken Breast" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="foodMealType">Meal Classification</label>
+            <select class="form-select" id="foodMealType">
+              <option value="Breakfast">Breakfast</option>
+              <option value="Morning Snack">Morning Snack</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Afternoon Snack">Afternoon Snack</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Post-Workout">Post-Workout</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="foodCalsInput">Calories (kcal)</label>
+              <input type="number" class="form-input" id="foodCalsInput" placeholder="250" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="foodProteinInput">Protein (g)</label>
+              <input type="number" class="form-input" id="foodProteinInput" placeholder="30" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="foodCarbsInput">Carbs (g)</label>
+              <input type="number" class="form-input" id="foodCarbsInput" placeholder="20" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="foodFatsInput">Fats (g)</label>
+              <input type="number" class="form-input" id="foodFatsInput" placeholder="5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="foodFiberInput">Fiber (g)</label>
+              <input type="number" class="form-input" id="foodFiberInput" placeholder="2" />
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.25rem;">
+            <button type="button" class="btn btn-secondary" id="cancelAddFoodBtn" data-modal-close="true">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add to Today's Log</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. RECIPE VIEWER MODAL -->
+  <div class="modal-backdrop" id="modalRecipeViewer">
+    <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="recipeModalTitle">🥗 Recipe Details</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body" id="recipeModalBody">
+        <!-- Dynamically injected -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-modal-close="true">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CONSULTATION REQUEST MODAL -->
+  <div class="modal-backdrop" id="modalConsultRequest">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>👩‍⚕️</span> Request Consultation</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">
+          Schedule an evidence-based clinical nutrition session with <strong id="consultSpecName">Specialist</strong>.
+        </p>
+        <form onsubmit="event.preventDefault(); NutriAIApp.closeAllModals(); NutriAIApp.showToast('Consultation request submitted! The specialist will contact you shortly.', 'success');">
+          <div class="form-group">
+            <label class="form-label">Preferred Session Type</label>
+            <select class="form-select">
+              <option>1-on-1 Telehealth Video Consultation (45 min)</option>
+              <option>Comprehensive Nutritional Protocol & Lab Review (60 min)</option>
+              <option>Competition & Athletic Peak Performance Coaching</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Key Objectives or Questions</label>
+            <textarea class="form-textarea" rows="3" placeholder="Describe your primary nutritional goals or symptoms..."></textarea>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.25rem;">
+            <button type="button" class="btn btn-secondary" id="cancelConsultBtn" data-modal-close="true">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. AI CUSTOM MEAL PLAN GENERATOR MODAL -->
+  <div class="modal-backdrop" id="modalCustomMealPlan">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title"><span>✨</span> AI Custom Meal Plan Generator</h3>
+        <button type="button" class="modal-close" data-modal-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.875rem; color:var(--text-body); line-height:1.6; margin-bottom:1rem;">
+          Tell Gemini AI what ingredients you have in your fridge, specific cravings, or dietary preferences. It will generate a tailored 7-day schedule matching your <strong>${appState.targets.calories} kcal</strong> target!
+        </p>
+        <form id="aiMealPlanGenForm">
+          <div class="form-group">
+            <label class="form-label" for="aiPlanPromptInput">Custom Preferences & Available Ingredients</label>
+            <textarea class="form-textarea" id="aiPlanPromptInput" rows="3" placeholder="e.g. I have chicken, sweet potatoes, Greek yogurt, spinach and eggs. I want quick meals under 20 minutes with high protein."></textarea>
+          </div>
+          <div id="aiPlanGenLoading" style="display:none; margin-bottom:1rem; font-size:0.8125rem; color:var(--primary-700); font-weight:700;">
+            ⏳ Generating personalized 7-day culinary plan...
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.25rem;">
+            <button type="button" class="btn btn-secondary" data-modal-close="true">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="aiPlanGenSubmitBtn">Generate 7-Day Plan ✨</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript Modules with Cache-Busting Version Query -->
+  <script src="js/data.js?v=4.2"></script>
+  <script src="js/apiClient.js?v=4.2"></script>
+  <script src="js/state.js?v=4.2"></script>
+  <script src="js/charts.js?v=4.2"></script>
+  <script src="js/navigation.js?v=4.2"></script>
+  <script src="js/mealFilter.js?v=4.2"></script>
+  <script src="js/aiService.js?v=4.2"></script>
+  <script src="js/authService.js?v=4.2"></script>
+  <script src="js/dbService.js?v=4.2"></script>
+  <script src="js/reportService.js?v=4.2"></script>
+  <script src="js/app.js?v=4.2"></script>
+
 </body>
 </html>
