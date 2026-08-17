@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NutriAI — Personalized Nutrition & Metabolic Wellness Platform</title>
+  <title>NutriAI — Clinical AI Nutrition & Precision Metabolic Health Platform</title>
   <meta name="description" content="NutriAI combines user biometrics, metabolic science, and personalized nutrition planning to help you reach your peak health and body composition goals." />
+  
+  <!-- Favicons & Brand Assets -->
+  <link rel="icon" type="image/png" href="assets/branding/nutriai-favicon.png" />
+  <link rel="apple-touch-icon" href="assets/branding/nutriai-favicon.png" />
   
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,9 +31,9 @@
          ========================================================= -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
-        <a href="#dashboard" class="brand-logo" data-nav-target="dashboard">
-          <div class="brand-icon">🥗</div>
-          <span>NutriAI</span>
+        <a href="#dashboard" class="brand-logo" data-nav-target="dashboard" style="text-decoration:none; display:flex; align-items:center; gap:0.65rem;">
+          <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI Official Logo" class="brand-logo-mark">
+          <span style="font-size:1.25rem; font-weight:800; letter-spacing:-0.02em; color:var(--text-heading);">Nutri<span class="text-emerald">AI</span></span>
         </a>
       </div>
 
@@ -228,7 +232,12 @@
         <section id="view-login" class="view-section">
           <div class="guest-welcome-hero" style="display:block; margin-bottom:2rem;">
             <div style="max-width:820px; margin:0 auto; text-align:center;">
-              <span class="badge badge-emerald" style="font-size:0.8125rem; padding:0.35rem 0.85rem; margin-bottom:1rem; display:inline-block;">🥗 Clinical AI Nutrition & Metabolic Platform</span>
+              <div style="margin-bottom:1.5rem; display:inline-block;">
+                <img src="assets/branding/nutriai-logo.png" alt="NutriAI — Advanced Nutrition Solutions" class="landing-hero-logo">
+              </div>
+              <div>
+                <span class="badge badge-emerald" style="font-size:0.8125rem; padding:0.35rem 0.85rem; margin-bottom:1rem; display:inline-block;">🥗 Clinical AI Nutrition & Metabolic Platform</span>
+              </div>
               <h2 style="font-size:2.25rem; font-weight:800; color:var(--text-heading); margin-bottom:0.75rem; letter-spacing:-0.02em;">Welcome to NutriAI</h2>
               <p style="font-size:1.1rem; color:var(--text-body); line-height:1.6; margin-bottom:2rem; max-width:680px; margin-left:auto; margin-right:auto;">
                 NutriAI generates clinical metabolic targets (BMR, TDEE, Mifflin-St Jeor macro splits) and individualized 7-day meal plans based purely on your biometric profile.
@@ -1393,11 +1402,20 @@
   <!-- 1. LOGIN MODAL -->
   <div class="modal-backdrop" id="modalAuthLogin">
     <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 class="modal-title"><span>🥗</span> NutriAI Sign In</h3>
+      <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:0.65rem;">
+          <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI Logo" class="brand-logo-mark" style="width:28px; height:28px;">
+          <h3 class="modal-title" style="margin:0; font-size:1.15rem;">Nutri<span class="text-emerald">AI</span> Sign In</h3>
+        </div>
         <button type="button" class="modal-close" data-modal-close="true">&times;</button>
       </div>
       <div class="modal-body">
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          <img src="assets/branding/nutriai-logo.png" alt="NutriAI Brand" class="auth-modal-logo" style="margin-bottom:0.75rem;">
+          <h4 style="font-size:1.15rem; font-weight:800; color:var(--text-heading); margin:0;">Welcome to NutriAI</h4>
+          <p style="font-size:0.8125rem; color:var(--text-muted); margin:0.25rem 0 0;">Personalized Nutrition, Biometrics & Wellness</p>
+        </div>
+
         <div style="background:var(--primary-50); border:1px solid var(--primary-200); border-radius:var(--radius-md); padding:0.875rem; margin-bottom:1.25rem;">
           <div style="font-size:0.875rem; font-weight:700; color:var(--primary-900);">Quick Demo Access</div>
           <div style="font-size:0.8125rem; color:var(--primary-800); margin-top:0.25rem;">
@@ -1430,8 +1448,11 @@
   <!-- 2. SIGN UP 3-STEP ONBOARDING WIZARD MODAL -->
   <div class="modal-backdrop" id="modalAuthSignup">
     <div class="modal-dialog modal-dialog-lg">
-      <div class="modal-header">
-        <h3 class="modal-title"><span>🥗</span> Join NutriAI — Personalized Onboarding</h3>
+      <div class="modal-header" style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:0.65rem;">
+          <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI Logo" class="brand-logo-mark" style="width:28px; height:28px;">
+          <h3 class="modal-title" style="margin:0; font-size:1.15rem;">Join Nutri<span class="text-emerald">AI</span> — Personalized Onboarding</h3>
+        </div>
         <button type="button" class="modal-close" data-modal-close="true">&times;</button>
       </div>
       <div class="modal-body">
