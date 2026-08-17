@@ -224,8 +224,46 @@
              ========================================================= -->
         <section id="view-dashboard" class="view-section active">
           
+          <!-- Guest Welcome Hero (Visible when no user is signed in) -->
+          <div class="guest-welcome-hero" id="guestWelcomeHero" style="display:none;">
+            <div style="max-width:760px; margin:0 auto;">
+              <span class="badge badge-emerald" style="font-size:0.8125rem; padding:0.35rem 0.85rem; margin-bottom:1rem; display:inline-block;">🥗 Clinical AI Nutrition Platform</span>
+              <h2 style="font-size:1.85rem; font-weight:800; color:var(--text-heading); margin-bottom:0.75rem; letter-spacing:-0.02em;">Welcome to NutriAI</h2>
+              <p style="font-size:1.05rem; color:var(--text-body); line-height:1.6; margin-bottom:1.5rem;">
+                NutriAI calculates precision metabolic targets (BMR, TDEE, Mifflin-St Jeor macro splits) and clinical 7-day meal plans based purely on your individual health profile. Create your profile or sign in to get started.
+              </p>
+              <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.75rem;">
+                <button type="button" class="btn btn-primary" id="guestStartWizardBtn" style="padding:0.75rem 1.75rem; font-size:1rem; font-weight:700;">
+                  ✨ Create Your Profile (3-Step Wizard)
+                </button>
+                <button type="button" class="btn btn-outline" id="guestSignInBtn" style="padding:0.75rem 1.5rem; font-size:1rem; font-weight:600;">
+                  🔑 Sign In to Existing Account
+                </button>
+              </div>
+
+              <!-- Feature Highlights Grid -->
+              <div class="guest-hero-grid">
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🧬</span>
+                  <h4>Mifflin-St Jeor Metabolic Model</h4>
+                  <p>Individualized BMR, TDEE, and macro distribution based on your height, weight, age, and activity.</p>
+                </div>
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🥗</span>
+                  <h4>Adaptive 7-Day Meal Plans</h4>
+                  <p>Indian, Mediterranean, and Continental cuisines tailored to your allergies and dietary choices.</p>
+                </div>
+                <div class="guest-hero-card">
+                  <span class="guest-hero-card-icon">🤖</span>
+                  <h4>Live AI Nutrition Intelligence</h4>
+                  <p>Live dietary calculations, dish substitutions, and instant recipe macro analysis.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Key Metrics Grid -->
-          <div class="stats-grid">
+          <div class="stats-grid" id="dashStatsGrid">
             
             <!-- Calories Card -->
             <div class="stat-card">
@@ -234,15 +272,15 @@
                 <span class="stat-icon">🔥</span>
               </div>
               <div class="stat-value">
-                <span id="statCaloriesVal">0</span>
-                <span class="stat-unit" id="statCaloriesTarget">/ 2150 kcal</span>
+                <span id="statCaloriesVal">—</span>
+                <span class="stat-unit" id="statCaloriesTarget">/ — kcal</span>
               </div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill bg-emerald" id="statCaloriesProgress" style="width: 0%;"></div>
               </div>
               <div class="stat-meta">
                 <span id="statCaloriesGoalLabel">Target Caloric Goal</span>
-                <span id="statCaloriesRemaining">0 kcal logged</span>
+                <span id="statCaloriesRemaining">Sign in to calculate</span>
               </div>
             </div>
 
@@ -253,15 +291,15 @@
                 <span class="stat-icon">🥩</span>
               </div>
               <div class="stat-value">
-                <span id="statProteinVal">0</span>
-                <span class="stat-unit" id="statProteinTarget">/ 155g</span>
+                <span id="statProteinVal">—</span>
+                <span class="stat-unit" id="statProteinTarget">/ —g</span>
               </div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill bg-blue" id="statProteinProgress" style="width: 0%;"></div>
               </div>
               <div class="stat-meta">
-                <span>2.1g / kg bodyweight</span>
-                <span>Optimal</span>
+                <span id="statProteinMeta">Target Ratio</span>
+                <span id="statProteinStatus">—</span>
               </div>
             </div>
 
@@ -272,15 +310,15 @@
                 <span class="stat-icon">🌾</span>
               </div>
               <div class="stat-value">
-                <span id="statCarbsVal">0</span>
-                <span class="stat-unit" id="statCarbsTarget">/ 210g</span>
+                <span id="statCarbsVal">—</span>
+                <span class="stat-unit" id="statCarbsTarget">/ —g</span>
               </div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill bg-amber" id="statCarbsProgress" style="width: 0%;"></div>
               </div>
               <div class="stat-meta">
-                <span>Complex Glycemic Sources</span>
-                <span>Steady</span>
+                <span id="statCarbsMeta">Complex Glycemic</span>
+                <span id="statCarbsStatus">—</span>
               </div>
             </div>
 
@@ -291,15 +329,15 @@
                 <span class="stat-icon">🥑</span>
               </div>
               <div class="stat-value">
-                <span id="statFatsVal">0</span>
-                <span class="stat-unit" id="statFatsTarget">/ 60g</span>
+                <span id="statFatsVal">—</span>
+                <span class="stat-unit" id="statFatsTarget">/ —g</span>
               </div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill bg-rose" id="statFatsProgress" style="width: 0%;"></div>
               </div>
               <div class="stat-meta">
-                <span>25% Total Caloric Ratio</span>
-                <span>Balanced</span>
+                <span id="statFatsMeta">Lipid Balance</span>
+                <span id="statFatsStatus">—</span>
               </div>
             </div>
 
@@ -311,21 +349,21 @@
               </div>
               <div class="stat-value">
                 <span id="statWaterVal">0.0L</span>
-                <span class="stat-unit" id="statWaterTarget">/ 3.2L</span>
+                <span class="stat-unit" id="statWaterTarget">/ —L</span>
               </div>
               <div class="progress-bar-container">
                 <div class="progress-bar-fill bg-cyan" id="statWaterProgress" style="width: 0%;"></div>
               </div>
               <div class="stat-meta">
-                <span id="statWaterMeta">0% of Daily Goal</span>
-                <span>+250ml quick</span>
+                <span id="statWaterMeta">Sign in to log water</span>
+                <span>💧 Water Goal</span>
               </div>
             </div>
 
           </div>
 
           <!-- Health Overview Summary Card -->
-          <div class="card" style="margin-bottom:0;">
+          <div class="card" style="margin-bottom:0;" id="dashHealthOverviewCard">
             <div class="card-header">
               <div>
                 <h3 style="font-size:1.05rem;">Health Profile Overview</h3>
@@ -337,28 +375,28 @@
               <div style="margin-bottom:0.75rem;">
                 <div style="display:flex; justify-content:space-between; font-size:0.8125rem; margin-bottom:0.3rem;">
                   <span style="font-weight:600; color:var(--text-main);">Profile Completion</span>
-                  <span id="dashProfileCompPct" style="font-weight:700; color:var(--primary-700);">89%</span>
+                  <span id="dashProfileCompPct" style="font-weight:700; color:var(--primary-700);">0%</span>
                 </div>
                 <div class="progress-bar-container">
-                  <div class="progress-bar-fill bg-emerald" id="dashProfileCompBar" style="width:89%;"></div>
+                  <div class="progress-bar-fill bg-emerald" id="dashProfileCompBar" style="width:0%;"></div>
                 </div>
               </div>
               <div class="health-overview-grid">
                 <div class="health-overview-item">
                   <span class="health-overview-label">BMI Status</span>
-                  <span class="health-overview-value" id="dashBmiSummary">BMI 23.4 · Normal</span>
+                  <span class="health-overview-value" id="dashBmiSummary">— (Sign in to calculate)</span>
                 </div>
                 <div class="health-overview-item">
                   <span class="health-overview-label">Primary Goal</span>
-                  <span class="health-overview-value" id="dashGoalSummary">Fat Loss</span>
+                  <span class="health-overview-value" id="dashGoalSummary">—</span>
                 </div>
                 <div class="health-overview-item">
                   <span class="health-overview-label">Dietary Style</span>
-                  <span class="health-overview-value" id="dashDietSummary">Balanced</span>
+                  <span class="health-overview-value" id="dashDietSummary">—</span>
                 </div>
                 <div class="health-overview-item">
                   <span class="health-overview-label">Daily Target</span>
-                  <span class="health-overview-value" id="dashCaloriesSummary">2,150 kcal/day</span>
+                  <span class="health-overview-value" id="dashCaloriesSummary">— kcal/day</span>
                 </div>
               </div>
             </div>
