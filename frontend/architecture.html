@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriAI — System Architecture & Developer Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    :root {
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --border-card: #e2e8f0;
+      --text-heading: #0f172a;
+      --text-muted: #64748b;
+      --primary-green: #10b981;
+      --primary-dark: #047857;
+      --code-bg: #0f172a;
+      --code-text: #38bdf8;
+    }
+    body {
+      background-color: var(--bg-page);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #334155;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    .guide-header {
+      background: linear-gradient(135deg, #064e3b, #047857, #0f172a);
+      color: white;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .guide-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .guide-header p {
+      font-size: 1.1rem;
+      color: #a7f3d0;
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+    }
+    .guide-nav-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .guide-nav-btn {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      color: white;
+      text-decoration: none;
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .guide-nav-btn:hover {
+      background: white;
+      color: #064e3b;
+      transform: translateY(-2px);
+    }
+    .guide-container {
+      max-width: 1100px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-heading);
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: transform 0.2s;
+    }
+    .feature-box:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+    }
+    .feature-box h4 {
+      margin: 0 0 0.5rem;
+      font-size: 1.05rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .badge-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-weight: 700;
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-amber { background: #fef3c7; color: #92400e; }
+    
+    pre.code-block {
+      background: var(--code-bg);
+      color: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .highlight-fn { color: #f472b6; }
+    .highlight-kw { color: #38bdf8; }
+    .highlight-str { color: #a7f3d0; }
+    .highlight-comment { color: #64748b; font-style: italic; }
+
+    /* Interactive API Tester */
+    .tester-card {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .tester-btn {
+      background: var(--primary-green);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+    .tester-btn:hover { background: var(--primary-dark); }
+    .tester-output {
+      background: #0f172a;
+      color: #34d399;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8125rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 0.75rem;
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    table.data-table th, table.data-table td {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+    }
+    table.data-table th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .status-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: #059669;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="guide-header">
+    <h1>🥗 NutriAI Full-Stack Architecture</h1>
+    <p>Complete guide to how the Frontend, Backend, AI Engine, and SQLite Database work together.</p>
+    <div class="guide-nav-bar">
+      <a href="index.html" class="guide-nav-btn">🚀 Open NutriAI Dashboard</a>
+      <a href="#frontend-section" class="guide-nav-btn">💻 Frontend Logic</a>
+      <a href="#backend-section" class="guide-nav-btn">⚙️ Backend Logic</a>
+      <a href="#storage-section" class="guide-nav-btn">🗄️ Where Data is Stored</a>
+      <a href="#api-tester" class="guide-nav-btn">⚡ Live API Tester</a>
+    </div>
+  </header>
+
+  <div class="guide-container">
+
+    <!-- OVERVIEW DIAGRAM -->
+    <section class="section-card">
+      <h2 class="section-title">🗺️ System Architecture Flowchart</h2>
+      <p style="color:var(--text-muted); font-size:0.95rem;">
+        NutriAI is a decoupled full-stack health platform. The Frontend renders the UI and calculates immediate feedback, while the Backend handles permanent SQL persistence, password encryption, and secure Google Gemini AI routing.
+      </p>
+      
+      <div style="background:#0f172a; padding:1.5rem; border-radius:0.75rem; color:#f8fafc; font-family:'Fira Code',monospace; font-size:0.875rem; overflow-x:auto; line-height:1.6;">
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 1. FRONTEND BROWSER                                    │
+│   Dashboard UI • 3-Step Wizard • Canvas Charts • 7-Day Meal Plans • AI Nutritionist    │
+└───────────────────────────────────────────┬────────────────────────────────────────────┘
+                                            │ HTTP / JSON REST API
+                                            ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        2. BACKEND API SERVER (Flask / Python)                          │
+│                                                                                        │
+│   • /api/auth      -> Salted SHA-256 Hashing, 3-Step Wizard User Registration          │
+│   • /api/profile   -> Mifflin-St Jeor Metabolic Formulas (BMR, TDEE, Macros)           │
+│   • /api/tracking  -> Zero-Based Daily Consumed Ledger (Calories, Protein, Water)      │
+│   • /api/ai/chat   -> Clinical Intent Classifier & Multi-Model Gemini Cascade          │
+└─────────────────────────────────────┬───────────────────┬──────────────────────────────┘
+                                      │                   │
+                     SQL Queries      │                   │ HTTPS Secure Proxy
+                                      ▼                   ▼
+                ┌───────────────────────────┐   ┌───────────────────────────┐
+                │ 3. SQLITE DATABASE        │   │ 4. GOOGLE GEMINI AI API   │
+                │    (backend/nutriai.db)   │   │    (Cloud Multi-Model)    │
+                │                           │   │                           │
+                │ • users     • profiles    │   │ • gemini-2.5-flash        │
+                │ • meals     • food_logs   │   │ • gemini-1.5-flash        │
+                │ • water     • weight_log  │   │ • gemini-2.0-flash        │
+                └───────────────────────────┘   └───────────────────────────┘
+      </div>
+    </section>
+
+    <!-- FRONTEND EXPLANATION -->
+    <section class="section-card" id="frontend-section">
+      <h2 class="section-title">💻 1. How the Frontend Works</h2>
+      <p style="color:var(--text-muted); font-size:0.95rem;">
+        The frontend is built with pure Vanilla JavaScript (ES6+), HTML5, and responsive CSS with zero heavy framework bloat. It is split into specialized modular files inside <code>frontend/js/</code>:
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4><code>apiClient.js</code> <span class="badge-tag badge-green">Network Bridge</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Unified REST client that automatically communicates with your cloud backend (<code>https://nutriai-backend-y91i.onrender.com/api</code>) or local fallback. Automatically attaches JWT tokens to requests.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>state.js</code> <span class="badge-tag badge-blue">Single Source of Truth</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Manages the central reactive store (<code>appState</code>). Contains <code>getNutritionState()</code> which computes the zero-based daily consumption totals and calories remaining.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>authService.js</code> <span class="badge-tag badge-purple">Onboarding & Auth</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Controls the 3-step onboarding wizard (<code>registerUserFromWizard</code>), client-side password hashing, validation rules, and user login state.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>aiService.js</code> <span class="badge-tag badge-amber">AI Nutritionist</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Intent-aware conversational AI. Classifies questions into Recipe Requests, Macro Queries, Food Substitutions, and queries the backend AI endpoint with clinical context.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>charts.js</code> <span class="badge-tag badge-green">Canvas Visuals</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Native HTML5 Canvas chart renderer. Draws the Macro Doughnut Chart, 7-Day Caloric Intake Bar Chart, and Weight Trajectory Curves with zero external chart libraries.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>app.js</code> <span class="badge-tag badge-blue">UI Controller</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Master controller. Binds button clicks, modal transitions, topbar initial avatar (<code>K</code>/<code>A</code>), account dropdown popover, and food logging interactions.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BACKEND EXPLANATION -->
+    <section class="section-card" id="backend-section">
+      <h2 class="section-title">⚙️ 2. How the Backend Works</h2>
+      <p style="color:var(--text-muted); font-size:0.95rem;">
+        The backend is a high-performance <strong>Python Flask REST API</strong> located in <code>backend/</code> and deployed 24/7 on Render Cloud:
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4><code>backend/app.py</code> <span class="badge-tag badge-green">API Entrypoint</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Initializes the Flask application, configures CORS headers, and registers Blueprints for <code>/api/auth</code>, <code>/api/profile</code>, <code>/api/tracking</code>, and <code>/api/ai</code>.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>backend/database.py</code> <span class="badge-tag badge-blue">Database Engine</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Creates and manages SQLite tables. Implements <code>calculate_metabolic_targets()</code> containing the exact Mifflin-St Jeor formulas (BMR, TDEE, Macro splits).
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>backend/routes/auth_routes.py</code> <span class="badge-tag badge-purple">Security</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Handles <code>/api/auth/register</code> (salted SHA-256 password hashing), <code>/api/auth/login</code> (credential check), and <code>/api/auth/me</code>.
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4><code>backend/routes/tracking_routes.py</code> <span class="badge-tag badge-amber">Tracking Ledger</span></h4>
+          <p style="font-size:0.875rem; margin:0;">
+            Enforces zero-based consumption. Only checked/logged meals count towards consumed calories. Provides <code>/api/tracking/state</code>, <code>/meal/toggle</code>, <code>/water</code>, and <code>/weight</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATA STORAGE EXPLANATION -->
+    <section class="section-card" id="storage-section">
+      <h2 class="section-title">🗄️ 3. Where User Data is Stored</h2>
+      <p style="color:var(--text-muted); font-size:0.95rem;">
+        User data is stored across three persistent layers:
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Location</th>
+            <th>What is Stored Inside</th>
+            <th>Persistence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Primary Server Database</strong></td>
+            <td><code>backend/nutriai.db</code></td>
+            <td>
+              • <code>users</code>: ID, email, salted SHA-256 password hash.<br>
+              • <code>profiles</code>: Age, sex, height, weight, goal, diet, cuisine, allergies.<br>
+              • <code>checked_meals</code>: Explicitly checked daily meals.<br>
+              • <code>food_logs</code>: Custom food entries.<br>
+              • <code>water_logs</code>: Hydration totals.<br>
+              • <code>weight_history</code>: Weigh-in check-in history.
+            </td>
+            <td><span class="badge-tag badge-green">Permanent</span> (Safe on Disk)</td>
+          </tr>
+          <tr>
+            <td><strong>2. Browser Local Cache</strong></td>
+            <td>Browser <code>localStorage</code></td>
+            <td>
+              • <code>nutriai_jwt_token_v4</code>: Active session token.<br>
+              • <code>nutriai_active_user_v3</code>: Logged-in email.<br>
+              • <code>nutriai_users_db_v3</code>: Instant offline cache for zero UI lag.
+            </td>
+            <td><span class="badge-tag badge-blue">Local Device</span> (Instant Load)</td>
+          </tr>
+          <tr>
+            <td><strong>3. 24/7 Cloud Host</strong></td>
+            <td>Render Cloud Server</td>
+            <td>
+              Hosts the live Python REST API 24/7 at <code>https://nutriai-backend-y91i.onrender.com/api</code> so your app never stops when your PC is turned off.
+            </td>
+            <td><span class="badge-tag badge-purple">Cloud 24/7</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- LIVE API TESTER -->
+    <section class="section-card" id="api-tester">
+      <h2 class="section-title">⚡ 4. Live Interactive API Console</h2>
+      <p style="color:var(--text-muted); font-size:0.95rem;">
+        Click any button below to test your live cloud backend endpoints in real-time:
+      </p>
+
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <button class="tester-btn" onclick="testApi('/health', 'GET')">🩺 Test /api/health</button>
+        <button class="tester-btn" onclick="testApi('', 'GET')">📡 Test /api (Directory)</button>
+        <button class="tester-btn" onclick="testAiChat('Can you tell me the recipe of butter chicken?')">🍗 Test AI Recipe (Butter Chicken)</button>
+        <button class="tester-btn" onclick="testAiChat('how much calories do i have left today')">🔥 Test AI Macro Calculation</button>
+      </div>
+
+      <div class="status-live">
+        <span class="status-dot"></span>
+        <span id="testerStatusText">Ready to send test requests</span>
+      </div>
+
+      <div class="tester-output" id="apiResponseOutput">// Click a test button above to see the live server response...</div>
+    </section>
+
+  </div>
+
+  <script src="js/apiClient.js?v=4.2"></script>
+  <script>
+    const outputEl = document.getElementById("apiResponseOutput");
+    const statusText = document.getElementById("testerStatusText");
+
+    async function testApi(endpoint, method) {
+      statusText.textContent = `Sending ${method} request to backend...`;
+      outputEl.textContent = `Loading ${NutriAIApiClient.getBaseUrl()}${endpoint}...`;
+      try {
+        const res = await NutriAIApiClient.request(endpoint, { method });
+        statusText.textContent = `Status: 200 OK (${new Date().toLocaleTimeString()})`;
+        outputEl.textContent = JSON.stringify(res, null, 2);
+      } catch (err) {
+        statusText.textContent = `Error: ${err.message}`;
+        outputEl.textContent = `// Request Failed: ${err.message}`;
+      }
+    }
+
+    async function testAiChat(msg) {
+      statusText.textContent = `Querying AI Nutritionist with: "${msg}"...`;
+      outputEl.textContent = `Sending request to /api/ai/chat...`;
+      try {
+        const dummyNutritionState = {
+          dailyTarget: 2150,
+          caloriesConsumed: 420,
+          caloriesRemaining: 1730,
+          proteinConsumed: 22,
+          proteinTarget: 140,
+          proteinRemaining: 118
+        };
+        const dummyProfile = { name: "Karan", dietPreference: "Balanced", cuisinePreference: "Indian" };
+        const res = await NutriAIApiClient.chatWithAI(msg, [], dummyNutritionState, dummyProfile);
+        statusText.textContent = `AI Response Received (${new Date().toLocaleTimeString()})`;
+        outputEl.textContent = JSON.stringify(res, null, 2);
+      } catch (err) {
+        statusText.textContent = `Error: ${err.message}`;
+        outputEl.textContent = `// AI Query Failed: ${err.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
