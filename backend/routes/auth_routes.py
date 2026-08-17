@@ -10,6 +10,30 @@ from backend.database import get_db, hash_password, calculate_metabolic_targets
 
 auth_bp = Blueprint("auth", __name__)
 
+@auth_bp.route("/check-email", methods=["GET", "POST"])
+def check_email():
+    if request.method == "POST":
+        data = request.get_json() or {}
+        email = (data.get("email") or "").strip().lower()
+    else:
+        email = (request.args.get("email") or "").strip().lower()
+
+    if not email or "@" not in email or "." not in email:
+        return jsonify({"success": False, "error": "A valid email is required.", "exists": False}), 400
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+    row = cursor.fetchone()
+    conn.close()
+
+    exists = bool(row)
+    return jsonify({
+        "success": True,
+        "exists": exists,
+        "message": "An account already exists for this email. Please sign in." if exists else "Email is available."
+    }), 200
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json() or {}
@@ -66,7 +90,12 @@ def register():
     cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
     if cursor.fetchone():
         conn.close()
-        return jsonify({"success": False, "error": "An account with this email address already exists. Please log in."}), 409
+        return jsonify({
+            "success": False,
+            "error": "EMAIL_EXISTS",
+            "code": "EMAIL_EXISTS",
+            "message": "An account already exists for this email. Please sign in."
+        }), 409
 
     user_id = "usr_" + uuid.uuid4().hex[:12]
     pwd_hash = hash_password(password)
