@@ -111,41 +111,70 @@ const NutriAIAuthService = {
   },
 
   /**
-   * Complete 3-Step Onboarding Wizard Registration
-   * @param {object} payload - complete user profile and credentials
+   * Fast check if email is already registered (local DB + remote backend)
    */
-  async registerUserFromWizard(payload) {
-    if (!payload || typeof payload !== "object") {
-      throw new Error("Invalid registration data provided.");
+  async checkEmailExists(email) {
+    const emailNorm = (email || "").toLowerCase().trim();
+    if (!emailNorm || !emailNorm.includes("@")) return false;
+
+    // 1. Local DB check
+    const usersDb = this.getUsersDb();
+    if (usersDb && usersDb[emailNorm]) {
+      return true;
     }
 
+    // 2. Remote backend check
+    if (typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.checkEmail) {
+      try {
+        const res = await NutriAIApiClient.checkEmail(emailNorm);
+        if (res && res.exists) return true;
+      } catch {}
+    }
+
+    return false;
+  },
+
+  /**
+   * Onboarding Wizard Single-Action Registration
+   */
+  async registerUserFromWizard(payload = {}) {
     const {
-      fullName, name,
+      name,
+      fullName,
       email,
       password,
       age,
-      sex, gender,
+      gender,
+      sex,
       height,
-      currentWeight, weight,
+      weight,
+      currentWeight,
       targetWeight,
-      activity, activityLevel,
+      activityLevel,
+      activity,
       exerciseFrequency,
-      sleepDuration, sleep,
-      mealsPerDay, mealFrequency,
-      dietaryStyle, dietPreference,
-      cuisinePreference, cuisine,
-      wellnessGoal, goal,
-      allergies, restrictions
+      sleep,
+      sleepDuration,
+      mealFrequency,
+      mealsPerDay,
+      dietPreference,
+      dietaryStyle,
+      cuisinePreference,
+      cuisine,
+      goal,
+      wellnessGoal,
+      restrictions,
+      allergies
     } = payload;
 
     // 1. Validate Step 1 - Account
     const finalName = (fullName || name || "").trim();
     if (!finalName) {
-      throw new Error("Full name is required.");
+      throw new Error("Please enter your full name.");
     }
 
     const emailNorm = (email || "").toLowerCase().trim();
-    if (!emailNorm || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
+    if (!emailNorm || !emailNorm.includes("@") || !emailNorm.includes(".")) {
       throw new Error("Please enter a valid email address.");
     }
 
@@ -153,10 +182,25 @@ const NutriAIAuthService = {
       throw new Error("Password must be at least 6 characters long.");
     }
 
-    // Check duplicate email
+    // Fast check for duplicate email
     const usersDb = this.getUsersDb();
     if (usersDb[emailNorm]) {
-      throw new Error(`An account with email "${emailNorm}" already exists. Please Sign In.`);
+      const err = new Error(`An account already exists for ${emailNorm}. Please sign in.`);
+      err.code = "EMAIL_EXISTS";
+      throw err;
+    }
+
+    if (typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.checkEmail) {
+      try {
+        const checkRes = await NutriAIApiClient.checkEmail(emailNorm);
+        if (checkRes && checkRes.exists) {
+          const err = new Error(`An account already exists for ${emailNorm}. Please sign in.`);
+          err.code = "EMAIL_EXISTS";
+          throw err;
+        }
+      } catch (e) {
+        if (e.code === "EMAIL_EXISTS" || e.status === 409) throw e;
+      }
     }
 
     // 2. Validate Step 2 - Biometrics
