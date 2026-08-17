@@ -57,6 +57,20 @@ const NutriAINav = {
   },
 
   navigateTo(viewId, updateHash = true) {
+    const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
+    const protectedViews = ["profile", "mealplan", "nutrition", "wellness", "ai-chat", "reports", "settings"];
+
+    if (!isAuth && protectedViews.includes(viewId)) {
+      if (typeof NutriAIApp !== "undefined" && NutriAIApp.showToast) {
+        NutriAIApp.showToast("Please sign in or create your profile to access this section.", "info");
+        NutriAIApp.openModal("modalAuthLogin");
+      }
+      viewId = "dashboard";
+      if (updateHash) {
+        history.replaceState(null, "", "#dashboard");
+      }
+    }
+
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) {
       // Invalid hash — fall back and correct the URL
