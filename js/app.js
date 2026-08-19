@@ -1053,20 +1053,25 @@ const NutriAIApp = {
       });
     }
 
-    // Direct quantity input changes
+    // Direct quantity input changes (input, keyup, change, paste)
     if (qtyInput) {
-      qtyInput.addEventListener("input", () => this.recalculateScaledNutrition());
-      qtyInput.addEventListener("change", () => this.recalculateScaledNutrition());
+      ["input", "keyup", "change", "paste"].forEach(evt => {
+        qtyInput.addEventListener(evt, () => this.recalculateScaledNutrition());
+      });
     }
 
     // Unit dropdown changes
     if (unitSelect) {
       unitSelect.addEventListener("change", () => {
         const u = unitSelect.value;
-        if (u === "g" && (qtyInput.value === "1" || qtyInput.value === "1.0")) {
-          qtyInput.value = "100";
-        } else if ((u === "serving" || u === "bowl" || u === "piece") && qtyInput.value === "100") {
-          qtyInput.value = "1.0";
+        const currentVal = parseFloat(qtyInput?.value) || 1.0;
+        const baseWeight = this.currentBaseFood?.baseWeightGrams || (this.currentBaseFood?.baseUnit === "g" ? this.currentBaseFood.baseQty : 250);
+
+        if ((u === "g" || u === "ml") && (currentVal <= 10 || qtyInput.value === "1" || qtyInput.value === "1.0")) {
+          qtyInput.value = Math.round(baseWeight * currentVal).toString();
+        } else if ((u === "serving" || u === "bowl" || u === "piece") && currentVal >= 20) {
+          const ratio = Math.round((currentVal / baseWeight) * 10) / 10;
+          qtyInput.value = (ratio > 0 ? ratio : 1.0).toString();
         }
         this.recalculateScaledNutrition();
       });
@@ -1079,12 +1084,10 @@ const NutriAIApp = {
         if (!btn) return;
         const portion = parseFloat(btn.getAttribute("data-portion")) || 1.0;
         const u = unitSelect?.value || "serving";
+        const baseWeight = this.currentBaseFood?.baseWeightGrams || (this.currentBaseFood?.baseUnit === "g" ? this.currentBaseFood.baseQty : 250);
 
         if (u === "g" || u === "ml") {
-          const baseGrams = (this.currentBaseFood && this.currentBaseFood.baseUnit === "g") 
-            ? (this.currentBaseFood.baseQty || 100) 
-            : 100;
-          qtyInput.value = Math.round(baseGrams * portion).toString();
+          qtyInput.value = Math.round(baseWeight * portion).toString();
         } else {
           qtyInput.value = (Math.round(portion * 100) / 100).toString();
         }
@@ -1101,18 +1104,18 @@ const NutriAIApp = {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener("change", () => {
-          if (!this.currentBaseFood) {
-            this.setBaseFoodNutrition({
-              name: document.getElementById("foodNameInput")?.value || "Meal",
-              cals: Number(document.getElementById("foodCalsInput")?.value) || 0,
-              p: Number(document.getElementById("foodProteinInput")?.value) || 0,
-              c: Number(document.getElementById("foodCarbsInput")?.value) || 0,
-              f: Number(document.getElementById("foodFatsInput")?.value) || 0,
-              fiber: Number(document.getElementById("foodFiberInput")?.value) || 0,
-              qty: parseFloat(qtyInput?.value) || 1.0,
-              unit: unitSelect?.value || "serving"
-            });
-          }
+          this.currentBaseFood = {
+            name: document.getElementById("foodNameInput")?.value || "Meal",
+            baseQty: parseFloat(qtyInput?.value) || 1.0,
+            baseUnit: unitSelect?.value || "serving",
+            baseWeightGrams: unitSelect?.value === "g" ? (parseFloat(qtyInput?.value) || 250) : 250,
+            baseCals: Number(document.getElementById("foodCalsInput")?.value) || 0,
+            baseP: Number(document.getElementById("foodProteinInput")?.value) || 0,
+            baseC: Number(document.getElementById("foodCarbsInput")?.value) || 0,
+            baseF: Number(document.getElementById("foodFatsInput")?.value) || 0,
+            baseFiber: Number(document.getElementById("foodFiberInput")?.value) || 0,
+            isGramBase: unitSelect?.value === "g"
+          };
         });
       }
     });
@@ -1127,11 +1130,13 @@ const NutriAIApp = {
 
     const qty = foodData.qty !== undefined ? foodData.qty : (foodData.quantity || 1.0);
     const unit = foodData.unit || "serving";
+    const weightGrams = foodData.weightGrams || foodData.baseWeightGrams || (unit === "g" ? qty : 250);
 
     this.currentBaseFood = {
       name: foodData.name || foodData.foodName || "",
       baseQty: qty,
       baseUnit: unit,
+      baseWeightGrams: weightGrams,
       baseCals: Number(foodData.cals) || 0,
       baseP: Number(foodData.p) || 0,
       baseC: Number(foodData.c) || 0,
@@ -1152,12 +1157,12 @@ const NutriAIApp = {
     }
 
     if (badge) {
-      badge.textContent = `${qty}x (${qty} ${unit})`;
+      badge.textContent = `${qty}x Portion`;
     }
 
     if (hint) {
       if (foodData.portionDescription) {
-        hint.innerHTML = `<span>⚡</span> <span><strong>Portion:</strong> ${foodData.portionDescription}. Adjust quantity or tap buttons above to scale.</span>`;
+        hint.innerHTML = `<span>⚡</span> <span><strong>Portion:</strong> ${foodData.portionDescription}. Adjust quantity or tap buttons to scale.</span>`;
         hint.style.display = "flex";
       } else {
         hint.style.display = "none";
@@ -1185,14 +1190,17 @@ const NutriAIApp = {
     const hint = document.getElementById("foodPortionHint");
     const pillsContainer = document.getElementById("quickPortionPills");
 
-    const currentQty = parseFloat(qtyInput?.value) || 1.0;
-    const currentUnit = unitSelect?.value || "serving";
+    let currentQty = parseFloat(qtyInput?.value);
+    if (isNaN(currentQty) || currentQty <= 0) return;
+
+    let currentUnit = unitSelect?.value || "serving";
 
     if (!this.currentBaseFood) {
       this.currentBaseFood = {
         name: document.getElementById("foodNameInput")?.value || "Meal",
-        baseQty: currentQty,
+        baseQty: (currentUnit === "g" || currentUnit === "ml") ? currentQty : 1.0,
         baseUnit: currentUnit,
+        baseWeightGrams: (currentUnit === "g" || currentUnit === "ml") ? currentQty : 250,
         baseCals: Number(document.getElementById("foodCalsInput")?.value) || 0,
         baseP: Number(document.getElementById("foodProteinInput")?.value) || 0,
         baseC: Number(document.getElementById("foodCarbsInput")?.value) || 0,
@@ -1202,16 +1210,19 @@ const NutriAIApp = {
       };
     }
 
-    let multiplier = 1.0;
-    const baseQty = this.currentBaseFood.baseQty || 1.0;
+    // Auto-detect if user typed a gram amount (>= 20) while unit was set to "serving"
+    if (currentUnit === "serving" && currentQty >= 20) {
+      currentUnit = "g";
+      if (unitSelect) unitSelect.value = "g";
+    }
 
-    if ((this.currentBaseFood.baseUnit === "g" || this.currentBaseFood.baseUnit === "ml") && (currentUnit === "g" || currentUnit === "ml")) {
-      multiplier = currentQty / (baseQty || 100);
-    } else if (this.currentBaseFood.baseUnit === "g" && currentUnit !== "g") {
-      multiplier = currentQty;
-    } else if (this.currentBaseFood.baseUnit !== "g" && (currentUnit === "g" || currentUnit === "ml")) {
-      multiplier = currentQty / 100;
+    let multiplier = 1.0;
+    const baseWeight = this.currentBaseFood.baseWeightGrams || (this.currentBaseFood.baseUnit === "g" ? this.currentBaseFood.baseQty : 250);
+
+    if (currentUnit === "g" || currentUnit === "ml") {
+      multiplier = currentQty / (baseWeight || 250);
     } else {
+      const baseQty = this.currentBaseFood.baseQty || 1.0;
       multiplier = currentQty / (baseQty || 1.0);
     }
 
@@ -1235,23 +1246,21 @@ const NutriAIApp = {
     if (fEl) fEl.value = scaledF;
     if (fiberEl) fiberEl.value = scaledFiber;
 
+    const multDisplay = Math.round(multiplier * 100) / 100;
     if (badge) {
-      const multDisplay = Math.round(multiplier * 100) / 100;
       badge.textContent = `${multDisplay}x (${currentQty} ${currentUnit})`;
     }
 
     if (hint) {
-      hint.innerHTML = `<span>⚡</span> <span><strong>Scaled Portion:</strong> ${currentQty} ${currentUnit} → <strong>${scaledCals} kcal</strong> (${scaledP}g P, ${scaledC}g C, ${scaledF}g F)</span>`;
+      hint.innerHTML = `<span>⚡</span> <span><strong>Scaled (${multDisplay}x):</strong> ${currentQty} ${currentUnit} → <strong>${scaledCals} kcal</strong> (${scaledP}g P, ${scaledC}g C, ${scaledF}g F)</span>`;
       hint.style.display = "flex";
     }
 
     // Sync active pill state
     if (pillsContainer) {
-      const baseStandard = (currentUnit === "g" || currentUnit === "ml") ? 100 : 1.0;
-      const effectiveRatio = currentQty / baseStandard;
       pillsContainer.querySelectorAll(".btn-portion-pill").forEach(p => {
         const val = parseFloat(p.getAttribute("data-portion"));
-        p.classList.toggle("active", Math.abs(val - effectiveRatio) < 0.05);
+        p.classList.toggle("active", Math.abs(val - multDisplay) < 0.05);
       });
     }
   },
