@@ -736,7 +736,7 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
     }
 
     const prompt = `Analyze this food image as a professional clinical dietitian. Identify dish and calculate macros. Return ONLY raw JSON:
-{"foodName":"Dish Name","portionDescription":"Estimated portion","cals":450,"p":32,"c":44,"f":16,"fiber":7,"confidence":"high","ingredients":["ing1"],"healthInsight":"Insight."}`;
+{"foodName":"Dish Name","portionDescription":"Estimated portion (e.g. 1 bowl / 250g)","quantity":1.0,"unit":"serving","weightGrams":250,"cals":450,"p":32,"c":44,"f":16,"fiber":7,"confidence":"high","ingredients":["ing1"],"healthInsight":"Insight."}`;
 
     for (const model of this.CANDIDATE_MODELS) {
       try {
@@ -753,7 +753,10 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
           const data = await resp.json();
           let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
           raw = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
-          return JSON.parse(raw);
+          const parsed = JSON.parse(raw);
+          if (!parsed.quantity) parsed.quantity = 1.0;
+          if (!parsed.unit) parsed.unit = "serving";
+          return parsed;
         }
       } catch (e) {}
     }
@@ -766,6 +769,9 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
       return {
         foodName: "High-Protein Platter with Dal & Vegetables",
         portionDescription: "1 balanced portion (~380g)",
+        quantity: 1.0,
+        unit: "serving",
+        weightGrams: 380,
         cals: 480,
         p: 34,
         c: 48,
@@ -779,6 +785,9 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
     return {
       foodName: "Balanced High-Protein Nutrient Bowl",
       portionDescription: "1 standard serving (~350g)",
+      quantity: 1.0,
+      unit: "serving",
+      weightGrams: 350,
       cals: 440,
       p: 32,
       c: 42,
