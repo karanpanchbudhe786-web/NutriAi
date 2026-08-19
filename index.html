@@ -1729,19 +1729,23 @@
               <span id="portionMultiplierBadge" class="badge badge-emerald" style="font-size:0.75rem; font-weight:700;">1.0x Portion</span>
             </div>
 
-            <div class="portion-input-row">
-              <button type="button" class="portion-stepper-btn" id="foodQtyMinusBtn" aria-label="Decrease quantity">−</button>
-              <input type="number" class="form-input" id="foodQuantityInput" step="0.25" min="0.1" max="5000" value="1.0" style="text-align:center; font-weight:700; font-size:1rem; max-width:110px;" required />
-              <button type="button" class="portion-stepper-btn" id="foodQtyPlusBtn" aria-label="Increase quantity">+</button>
+            <div class="portion-input-grid">
+              <div class="portion-stepper-group">
+                <button type="button" class="portion-stepper-btn" id="foodQtyMinusBtn" aria-label="Decrease quantity">−</button>
+                <input type="number" class="form-input portion-qty-input" id="foodQuantityInput" step="any" min="0.01" max="10000" value="1.0" required />
+                <button type="button" class="portion-stepper-btn" id="foodQtyPlusBtn" aria-label="Increase quantity">+</button>
+              </div>
               
-              <select class="form-select" id="foodUnitSelect" style="flex:1; font-weight:600;">
-                <option value="serving" selected>serving(s) / portion(s)</option>
-                <option value="g">grams (g)</option>
-                <option value="bowl">bowl(s) / cup(s)</option>
-                <option value="piece">piece(s) / item(s)</option>
-                <option value="ml">ml (Milliliters)</option>
-                <option value="oz">oz (Ounces)</option>
-              </select>
+              <div class="portion-unit-group">
+                <select class="form-select portion-unit-select" id="foodUnitSelect">
+                  <option value="serving" selected>serving(s) / portion(s)</option>
+                  <option value="g">grams (g)</option>
+                  <option value="bowl">bowl(s) / cup(s)</option>
+                  <option value="piece">piece(s) / item(s)</option>
+                  <option value="ml">ml (Milliliters)</option>
+                  <option value="oz">oz (Ounces)</option>
+                </select>
+              </div>
             </div>
 
             <!-- Quick Portion Multiplier Tap Buttons -->
@@ -1761,26 +1765,26 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="foodCalsInput">Calories (kcal)</label>
-              <input type="number" class="form-input" id="foodCalsInput" placeholder="250" required />
+              <input type="number" class="form-input" id="foodCalsInput" step="any" min="0" placeholder="250" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="foodProteinInput">Protein (g)</label>
-              <input type="number" class="form-input" id="foodProteinInput" placeholder="30" />
+              <input type="number" class="form-input" id="foodProteinInput" step="any" min="0" placeholder="30" />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="foodCarbsInput">Carbs (g)</label>
-              <input type="number" class="form-input" id="foodCarbsInput" placeholder="20" />
+              <input type="number" class="form-input" id="foodCarbsInput" step="any" min="0" placeholder="20" />
             </div>
             <div class="form-group">
               <label class="form-label" for="foodFatsInput">Fats (g)</label>
-              <input type="number" class="form-input" id="foodFatsInput" placeholder="5" />
+              <input type="number" class="form-input" id="foodFatsInput" step="any" min="0" placeholder="5" />
             </div>
             <div class="form-group">
               <label class="form-label" for="foodFiberInput">Fiber (g)</label>
-              <input type="number" class="form-input" id="foodFiberInput" placeholder="2" />
+              <input type="number" class="form-input" id="foodFiberInput" step="any" min="0" placeholder="2" />
             </div>
           </div>
 
