@@ -10,6 +10,7 @@ const NutriAIApp = {
   chatHistory: [],
   currentPhotoBase64: null,
   currentPhotoMimeType: "image/jpeg",
+  currentBaseFood: null,
 
   init() {
     // 1. Initialize Navigation
@@ -23,6 +24,7 @@ const NutriAIApp = {
 
     // 4. Bind UI Global Events
     this.bindEvents();
+    this.bindPortionControlEvents();
     this.bindAIEvents();
     this.bindSettingsEvents();
 
@@ -175,12 +177,18 @@ const NutriAIApp = {
           const item = NutriAIData.foodDatabase[idx];
           if (item) {
             document.getElementById("foodNameInput").value = item.name;
-            document.getElementById("foodCalsInput").value = item.cals;
-            document.getElementById("foodProteinInput").value = item.p;
-            document.getElementById("foodCarbsInput").value = item.c;
-            document.getElementById("foodFatsInput").value = item.f;
-            const fiberInput = document.getElementById("foodFiberInput");
-            if (fiberInput) fiberInput.value = item.fiber || 0;
+            const is100g = item.name.includes("100g");
+            this.setBaseFoodNutrition({
+              name: item.name,
+              cals: item.cals,
+              p: item.p,
+              c: item.c,
+              f: item.f,
+              fiber: item.fiber || 0,
+              qty: is100g ? 100 : 1.0,
+              unit: is100g ? "g" : "serving",
+              portionDescription: is100g ? "100g base portion" : "1 standard serving"
+            });
           }
         }
       });
@@ -191,18 +199,31 @@ const NutriAIApp = {
     if (addFoodForm) {
       addFoodForm.addEventListener("submit", e => {
         e.preventDefault();
-        const name = document.getElementById("foodNameInput").value;
+        let name = document.getElementById("foodNameInput").value.trim();
         const cals = Number(document.getElementById("foodCalsInput").value) || 0;
         const p = Number(document.getElementById("foodProteinInput").value) || 0;
         const c = Number(document.getElementById("foodCarbsInput").value) || 0;
         const f = Number(document.getElementById("foodFatsInput").value) || 0;
         const fiber = Number(document.getElementById("foodFiberInput")?.value) || 0;
         const meal = document.getElementById("foodMealType").value;
+        const qty = parseFloat(document.getElementById("foodQuantityInput")?.value) || 1.0;
+        const unit = document.getElementById("foodUnitSelect")?.value || "serving";
 
-        if (!name.trim()) {
+        if (!name) {
           this.showToast("Please enter a food name.", "error");
           return;
         }
+
+        // Annotate food name with quantity if not already present
+        const hasParentheses = name.includes("(") && name.includes(")");
+        if (!hasParentheses) {
+          if (unit === "g" || unit === "ml") {
+            name = `${name} (${qty}${unit})`;
+          } else if (qty !== 1.0) {
+            name = `${name} (${qty} ${unit}s)`;
+          }
+        }
+
         appState.addFoodLog({ name, cals, p, c, f, fiber, meal });
         NutriAIDbService.syncToCloud();
         this.closeAllModals();
@@ -210,6 +231,7 @@ const NutriAIApp = {
         // Reset form & photo
         addFoodForm.reset();
         this.resetPhotoScanner();
+        this.currentBaseFood = null;
       });
     }
 
@@ -998,6 +1020,242 @@ const NutriAIApp = {
     }
   },
 
+  // --- Food Portion & Serving Scaling Logic ---
+  bindPortionControlEvents() {
+    const qtyInput = document.getElementById("foodQuantityInput");
+    const unitSelect = document.getElementById("foodUnitSelect");
+    const minusBtn = document.getElementById("foodQtyMinusBtn");
+    const plusBtn = document.getElementById("foodQtyPlusBtn");
+    const pillsContainer = document.getElementById("quickPortionPills");
+
+    // Stepper button: Minus
+    if (minusBtn && qtyInput) {
+      minusBtn.addEventListener("click", () => {
+        let val = parseFloat(qtyInput.value) || 1.0;
+        const u = unitSelect?.value || "serving";
+        const step = (u === "g" || u === "ml") ? 25 : 0.25;
+        const minVal = (u === "g" || u === "ml") ? 10 : 0.25;
+        val = Math.max(minVal, val - step);
+        qtyInput.value = (Math.round(val * 100) / 100).toString();
+        this.recalculateScaledNutrition();
+      });
+    }
+
+    // Stepper button: Plus
+    if (plusBtn && qtyInput) {
+      plusBtn.addEventListener("click", () => {
+        let val = parseFloat(qtyInput.value) || 1.0;
+        const u = unitSelect?.value || "serving";
+        const step = (u === "g" || u === "ml") ? 25 : 0.25;
+        val = val + step;
+        qtyInput.value = (Math.round(val * 100) / 100).toString();
+        this.recalculateScaledNutrition();
+      });
+    }
+
+    // Direct quantity input changes
+    if (qtyInput) {
+      qtyInput.addEventListener("input", () => this.recalculateScaledNutrition());
+      qtyInput.addEventListener("change", () => this.recalculateScaledNutrition());
+    }
+
+    // Unit dropdown changes
+    if (unitSelect) {
+      unitSelect.addEventListener("change", () => {
+        const u = unitSelect.value;
+        if (u === "g" && (qtyInput.value === "1" || qtyInput.value === "1.0")) {
+          qtyInput.value = "100";
+        } else if ((u === "serving" || u === "bowl" || u === "piece") && qtyInput.value === "100") {
+          qtyInput.value = "1.0";
+        }
+        this.recalculateScaledNutrition();
+      });
+    }
+
+    // Quick Portion Multiplier Tap Buttons
+    if (pillsContainer) {
+      pillsContainer.addEventListener("click", (e) => {
+        const btn = e.target.closest(".btn-portion-pill");
+        if (!btn) return;
+        const portion = parseFloat(btn.getAttribute("data-portion")) || 1.0;
+        const u = unitSelect?.value || "serving";
+
+        if (u === "g" || u === "ml") {
+          const baseGrams = (this.currentBaseFood && this.currentBaseFood.baseUnit === "g") 
+            ? (this.currentBaseFood.baseQty || 100) 
+            : 100;
+          qtyInput.value = Math.round(baseGrams * portion).toString();
+        } else {
+          qtyInput.value = (Math.round(portion * 100) / 100).toString();
+        }
+
+        pillsContainer.querySelectorAll(".btn-portion-pill").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+
+        this.recalculateScaledNutrition();
+      });
+    }
+
+    // Capture manual macro edits to re-anchor baseline
+    ["foodCalsInput", "foodProteinInput", "foodCarbsInput", "foodFatsInput", "foodFiberInput"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", () => {
+          if (!this.currentBaseFood) {
+            this.setBaseFoodNutrition({
+              name: document.getElementById("foodNameInput")?.value || "Meal",
+              cals: Number(document.getElementById("foodCalsInput")?.value) || 0,
+              p: Number(document.getElementById("foodProteinInput")?.value) || 0,
+              c: Number(document.getElementById("foodCarbsInput")?.value) || 0,
+              f: Number(document.getElementById("foodFatsInput")?.value) || 0,
+              fiber: Number(document.getElementById("foodFiberInput")?.value) || 0,
+              qty: parseFloat(qtyInput?.value) || 1.0,
+              unit: unitSelect?.value || "serving"
+            });
+          }
+        });
+      }
+    });
+  },
+
+  setBaseFoodNutrition(foodData) {
+    const qtyInput = document.getElementById("foodQuantityInput");
+    const unitSelect = document.getElementById("foodUnitSelect");
+    const pillsContainer = document.getElementById("quickPortionPills");
+    const badge = document.getElementById("portionMultiplierBadge");
+    const hint = document.getElementById("foodPortionHint");
+
+    const qty = foodData.qty !== undefined ? foodData.qty : (foodData.quantity || 1.0);
+    const unit = foodData.unit || "serving";
+
+    this.currentBaseFood = {
+      name: foodData.name || foodData.foodName || "",
+      baseQty: qty,
+      baseUnit: unit,
+      baseCals: Number(foodData.cals) || 0,
+      baseP: Number(foodData.p) || 0,
+      baseC: Number(foodData.c) || 0,
+      baseF: Number(foodData.f) || 0,
+      baseFiber: Number(foodData.fiber) || 0,
+      isGramBase: unit === "g" || (typeof foodData.name === "string" && foodData.name.includes("100g"))
+    };
+
+    if (qtyInput) qtyInput.value = qty.toString();
+    if (unitSelect) unitSelect.value = unit;
+
+    // Reset pills active state
+    if (pillsContainer) {
+      pillsContainer.querySelectorAll(".btn-portion-pill").forEach(p => {
+        const val = parseFloat(p.getAttribute("data-portion"));
+        p.classList.toggle("active", Math.abs(val - 1.0) < 0.05);
+      });
+    }
+
+    if (badge) {
+      badge.textContent = `${qty}x (${qty} ${unit})`;
+    }
+
+    if (hint) {
+      if (foodData.portionDescription) {
+        hint.innerHTML = `<span>⚡</span> <span><strong>Portion:</strong> ${foodData.portionDescription}. Adjust quantity or tap buttons above to scale.</span>`;
+        hint.style.display = "flex";
+      } else {
+        hint.style.display = "none";
+      }
+    }
+
+    // Populate input fields
+    const calsEl = document.getElementById("foodCalsInput");
+    const pEl = document.getElementById("foodProteinInput");
+    const cEl = document.getElementById("foodCarbsInput");
+    const fEl = document.getElementById("foodFatsInput");
+    const fiberEl = document.getElementById("foodFiberInput");
+
+    if (calsEl) calsEl.value = this.currentBaseFood.baseCals;
+    if (pEl) pEl.value = this.currentBaseFood.baseP;
+    if (cEl) cEl.value = this.currentBaseFood.baseC;
+    if (fEl) fEl.value = this.currentBaseFood.baseF;
+    if (fiberEl) fiberEl.value = this.currentBaseFood.baseFiber;
+  },
+
+  recalculateScaledNutrition() {
+    const qtyInput = document.getElementById("foodQuantityInput");
+    const unitSelect = document.getElementById("foodUnitSelect");
+    const badge = document.getElementById("portionMultiplierBadge");
+    const hint = document.getElementById("foodPortionHint");
+    const pillsContainer = document.getElementById("quickPortionPills");
+
+    const currentQty = parseFloat(qtyInput?.value) || 1.0;
+    const currentUnit = unitSelect?.value || "serving";
+
+    if (!this.currentBaseFood) {
+      this.currentBaseFood = {
+        name: document.getElementById("foodNameInput")?.value || "Meal",
+        baseQty: currentQty,
+        baseUnit: currentUnit,
+        baseCals: Number(document.getElementById("foodCalsInput")?.value) || 0,
+        baseP: Number(document.getElementById("foodProteinInput")?.value) || 0,
+        baseC: Number(document.getElementById("foodCarbsInput")?.value) || 0,
+        baseF: Number(document.getElementById("foodFatsInput")?.value) || 0,
+        baseFiber: Number(document.getElementById("foodFiberInput")?.value) || 0,
+        isGramBase: currentUnit === "g"
+      };
+    }
+
+    let multiplier = 1.0;
+    const baseQty = this.currentBaseFood.baseQty || 1.0;
+
+    if ((this.currentBaseFood.baseUnit === "g" || this.currentBaseFood.baseUnit === "ml") && (currentUnit === "g" || currentUnit === "ml")) {
+      multiplier = currentQty / (baseQty || 100);
+    } else if (this.currentBaseFood.baseUnit === "g" && currentUnit !== "g") {
+      multiplier = currentQty;
+    } else if (this.currentBaseFood.baseUnit !== "g" && (currentUnit === "g" || currentUnit === "ml")) {
+      multiplier = currentQty / 100;
+    } else {
+      multiplier = currentQty / (baseQty || 1.0);
+    }
+
+    if (isNaN(multiplier) || multiplier <= 0) multiplier = 1.0;
+
+    const scaledCals = Math.max(0, Math.round(this.currentBaseFood.baseCals * multiplier));
+    const scaledP = Math.max(0, Math.round(this.currentBaseFood.baseP * multiplier * 10) / 10);
+    const scaledC = Math.max(0, Math.round(this.currentBaseFood.baseC * multiplier * 10) / 10);
+    const scaledF = Math.max(0, Math.round(this.currentBaseFood.baseF * multiplier * 10) / 10);
+    const scaledFiber = Math.max(0, Math.round(this.currentBaseFood.baseFiber * multiplier * 10) / 10);
+
+    const calsEl = document.getElementById("foodCalsInput");
+    const pEl = document.getElementById("foodProteinInput");
+    const cEl = document.getElementById("foodCarbsInput");
+    const fEl = document.getElementById("foodFatsInput");
+    const fiberEl = document.getElementById("foodFiberInput");
+
+    if (calsEl) calsEl.value = scaledCals;
+    if (pEl) pEl.value = scaledP;
+    if (cEl) cEl.value = scaledC;
+    if (fEl) fEl.value = scaledF;
+    if (fiberEl) fiberEl.value = scaledFiber;
+
+    if (badge) {
+      const multDisplay = Math.round(multiplier * 100) / 100;
+      badge.textContent = `${multDisplay}x (${currentQty} ${currentUnit})`;
+    }
+
+    if (hint) {
+      hint.innerHTML = `<span>⚡</span> <span><strong>Scaled Portion:</strong> ${currentQty} ${currentUnit} → <strong>${scaledCals} kcal</strong> (${scaledP}g P, ${scaledC}g C, ${scaledF}g F)</span>`;
+      hint.style.display = "flex";
+    }
+
+    // Sync active pill state
+    if (pillsContainer) {
+      const baseStandard = (currentUnit === "g" || currentUnit === "ml") ? 100 : 1.0;
+      const effectiveRatio = currentQty / baseStandard;
+      pillsContainer.querySelectorAll(".btn-portion-pill").forEach(p => {
+        const val = parseFloat(p.getAttribute("data-portion"));
+        p.classList.toggle("active", Math.abs(val - effectiveRatio) < 0.05);
+      });
+    }
+  },
+
   // --- Food Photo Scanner Logic ---
   processFoodPhotoFile(file) {
     const preview = document.getElementById("foodPhotoPreview");
@@ -1025,18 +1283,25 @@ const NutriAIApp = {
       try {
         const analysis = await NutriAIAIService.analyzeFoodPhoto(base64Data, this.currentPhotoMimeType, "", appState);
 
-        // Auto-fill form inputs
-        if (analysis.foodName) document.getElementById("foodNameInput").value = analysis.foodName;
-        if (analysis.cals) document.getElementById("foodCalsInput").value = analysis.cals;
-        if (analysis.p) document.getElementById("foodProteinInput").value = analysis.p;
-        if (analysis.c) document.getElementById("foodCarbsInput").value = analysis.c;
-        if (analysis.f) document.getElementById("foodFatsInput").value = analysis.f;
-        if (analysis.fiber !== undefined) {
-          const fiberEl = document.getElementById("foodFiberInput");
-          if (fiberEl) fiberEl.value = analysis.fiber;
+        // Auto-fill food item name
+        if (analysis.foodName) {
+          document.getElementById("foodNameInput").value = analysis.foodName;
         }
 
-        this.showToast(`AI Identified: "${analysis.foodName}" (${analysis.cals} kcal) ✨`, "success");
+        // Set baseline nutrition and portion scaling
+        this.setBaseFoodNutrition({
+          name: analysis.foodName || "Detected Meal",
+          cals: analysis.cals || 450,
+          p: analysis.p || 30,
+          c: analysis.c || 40,
+          f: analysis.f || 15,
+          fiber: analysis.fiber || 5,
+          qty: analysis.quantity || 1.0,
+          unit: analysis.unit || "serving",
+          portionDescription: analysis.portionDescription || (analysis.weightGrams ? `~${analysis.weightGrams}g` : "1 standard serving")
+        });
+
+        this.showToast(`AI Identified: "${analysis.foodName}" (${analysis.cals} kcal). Adjust quantity if needed! ✨`, "success");
       } catch (err) {
         this.showToast("Could not analyze photo: " + err.message, "error");
       } finally {
@@ -1051,10 +1316,27 @@ const NutriAIApp = {
     const preview = document.getElementById("foodPhotoPreview");
     const promptText = document.getElementById("dropzonePromptText");
     const fileInput = document.getElementById("foodPhotoFileInput");
+    const hint = document.getElementById("foodPortionHint");
+    const badge = document.getElementById("portionMultiplierBadge");
+    const qtyInput = document.getElementById("foodQuantityInput");
+    const unitSelect = document.getElementById("foodUnitSelect");
+    const pillsContainer = document.getElementById("quickPortionPills");
+
     if (preview) preview.style.display = "none";
     if (promptText) promptText.style.display = "block";
     if (fileInput) fileInput.value = "";
+    if (hint) { hint.style.display = "none"; hint.innerHTML = ""; }
+    if (badge) badge.textContent = "1.0x Portion";
+    if (qtyInput) qtyInput.value = "1.0";
+    if (unitSelect) unitSelect.value = "serving";
+    if (pillsContainer) {
+      pillsContainer.querySelectorAll(".btn-portion-pill").forEach(p => {
+        const val = parseFloat(p.getAttribute("data-portion"));
+        p.classList.toggle("active", Math.abs(val - 1.0) < 0.05);
+      });
+    }
     this.currentPhotoBase64 = null;
+    this.currentBaseFood = null;
   },
 
   // --- Modals Management ---
