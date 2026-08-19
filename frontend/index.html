@@ -1720,6 +1720,44 @@
             </select>
           </div>
 
+          <!-- Quantity & Serving Size Selector Tap Controls -->
+          <div class="portion-control-container">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+              <label class="form-label" for="foodQuantityInput" style="margin:0; font-weight:700; color:var(--text-main); font-size:0.875rem;">
+                ⚖️ Quantity / Serving Portion
+              </label>
+              <span id="portionMultiplierBadge" class="badge badge-emerald" style="font-size:0.75rem; font-weight:700;">1.0x Portion</span>
+            </div>
+
+            <div class="portion-input-row">
+              <button type="button" class="portion-stepper-btn" id="foodQtyMinusBtn" aria-label="Decrease quantity">−</button>
+              <input type="number" class="form-input" id="foodQuantityInput" step="0.25" min="0.1" max="5000" value="1.0" style="text-align:center; font-weight:700; font-size:1rem; max-width:110px;" required />
+              <button type="button" class="portion-stepper-btn" id="foodQtyPlusBtn" aria-label="Increase quantity">+</button>
+              
+              <select class="form-select" id="foodUnitSelect" style="flex:1; font-weight:600;">
+                <option value="serving" selected>serving(s) / portion(s)</option>
+                <option value="g">grams (g)</option>
+                <option value="bowl">bowl(s) / cup(s)</option>
+                <option value="piece">piece(s) / item(s)</option>
+                <option value="ml">ml (Milliliters)</option>
+                <option value="oz">oz (Ounces)</option>
+              </select>
+            </div>
+
+            <!-- Quick Portion Multiplier Tap Buttons -->
+            <div class="quick-portion-pills" id="quickPortionPills">
+              <span style="font-size:0.75rem; color:var(--text-muted); margin-right:0.25rem; font-weight:600;">Quick Tap:</span>
+              <button type="button" class="btn-portion-pill" data-portion="0.5">0.5x</button>
+              <button type="button" class="btn-portion-pill active" data-portion="1.0">1.0x</button>
+              <button type="button" class="btn-portion-pill" data-portion="1.5">1.5x</button>
+              <button type="button" class="btn-portion-pill" data-portion="2.0">2.0x</button>
+              <button type="button" class="btn-portion-pill" data-portion="3.0">3.0x</button>
+            </div>
+
+            <!-- Live Portion Scaling Feedback Hint -->
+            <div id="foodPortionHint" class="portion-scale-hint" style="display:none;"></div>
+          </div>
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="foodCalsInput">Calories (kcal)</label>
