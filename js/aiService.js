@@ -733,34 +733,8 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
       return this.generateSimulatedFoodPhotoAnalysis(userNote, state);
     }
 
-    const prompt = `You are a precision Clinical Dietitian and AI Food Vision Analyzer trained on ICMR-NIN (Indian Food Composition Tables 2017) and USDA FoodData Central databases.
-
-Analyze the food image and return a SINGLE raw JSON object (no markdown, no explanation, no extra text) following these STRICT rules:
-
-STEP 1 — IDENTIFICATION:
-Identify the exact dish name. If Indian food, name it precisely (e.g. "Vada Pav", "Masala Dosa", "Dal Tadka", "Chicken Biryani", "Poha").
-
-STEP 2 — INGREDIENT DECONSTRUCTION:
-List the primary ingredients and their approximate gram weights as seen/estimated in the image.
-
-STEP 3 — MACRO CALCULATION (ICMR-NIN / USDA STANDARDS — MANDATORY RULES):
-- Potato, refined wheat flour (maida), poha, rice, bread buns = HIGH CARB (60-80g per 100g), VERY LOW PROTEIN (1-3g per 100g)
-- Deep-fried items (Vada, Samosa, Bhatura) = HIGH FAT (12-20g per serving)
-- Lentils / Dal / Legumes = MODERATE PROTEIN (7-10g per 100g cooked)
-- Paneer = HIGH PROTEIN (18g per 100g) + HIGH FAT (20g per 100g)
-- Chicken breast cooked = HIGH PROTEIN (31g per 100g), LOW FAT (3-5g per 100g)
-- Eggs (1 whole large) = 6g protein, 5g fat, 0.5g carbs, 72 kcal
-- DO NOT assign more than 8g protein to any purely starchy/fried street food (Vada Pav, Samosa, Bhatura, Puri, etc.)
-
-STEP 4 — CALORIE VERIFICATION (ATWATER FORMULA — MANDATORY):
-calories_kcal MUST equal: round((protein_g x 4) + (carbs_g x 4) + (fats_g x 9))
-Fiber contributes ~2 kcal/g. Final calorie figure must be within 5% of this formula.
-
-STEP 5 — OUTPUT:
-Return ONLY this JSON (no extra text):
-{"foodName":"string","portionDescription":"e.g. 1 piece / 120g","quantity":1.0,"unit":"piece|bowl|plate|serving|g","weightGrams":120,"cals":280,"p":6.0,"c":42.0,"f":11.5,"fiber":2.5,"confidence":"high|medium|low","ingredients":["ingredient 1","ingredient 2"],"healthInsight":"One evidence-based clinical insight about this meal."}
-
-${userNote ? `User notes about this food: "${userNote}"` : ""}`;
+    const prompt = `Analyze this food image as a professional clinical dietitian. Identify dish and calculate macros. Return ONLY raw JSON:
+{"foodName":"Dish Name","portionDescription":"Estimated portion (e.g. 1 bowl / 250g)","quantity":1.0,"unit":"serving","weightGrams":250,"cals":450,"p":32,"c":44,"f":16,"fiber":7,"confidence":"high","ingredients":["ing1"],"healthInsight":"Insight."}`;
 
     for (const model of this.CANDIDATE_MODELS) {
       try {
@@ -770,87 +744,55 @@ ${userNote ? `User notes about this food: "${userNote}"` : ""}`;
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType, data: base64Data } }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 700 }
+            generationConfig: { temperature: 0.2, maxOutputTokens: 600 }
           })
         });
         if (resp.ok) {
           const data = await resp.json();
           let raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
           raw = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
-          // Extract JSON object if model wrapped it in text
-          const jsonMatch = raw.match(/\{[\s\S]*\}/);
-          if (!jsonMatch) continue;
-          const parsed = JSON.parse(jsonMatch[0]);
-
-          // --- Atwater Validation Gate (auto-correct if >10% off) ---
-          const atwaterCals = Math.round((parsed.p || 0) * 4 + (parsed.c || 0) * 4 + (parsed.f || 0) * 9 + (parsed.fiber || 0) * 2);
-          const reportedCals = parsed.cals || 0;
-          if (reportedCals > 0 && Math.abs(reportedCals - atwaterCals) / atwaterCals > 0.10) {
-            parsed.cals = atwaterCals;
-          }
-
+          const parsed = JSON.parse(raw);
           if (!parsed.quantity) parsed.quantity = 1.0;
           if (!parsed.unit) parsed.unit = "serving";
-          if (!parsed.weightGrams) parsed.weightGrams = 250;
           return parsed;
         }
-      } catch (e) { /* try next model */ }
+      } catch (e) {}
     }
     return this.generateSimulatedFoodPhotoAnalysis(userNote, state);
   },
 
   generateSimulatedFoodPhotoAnalysis(userNote, state) {
-    // Combine userNote with whatever is typed in the food name input for the best possible keyword match
-    const typedName = (typeof document !== "undefined" && document.getElementById?.("foodNameInput")?.value) || "";
-    const hint = ((userNote || "") + " " + typedName).toLowerCase().trim();
-
-    // --- ICMR-NIN Verified Indian Street Food & Traditional Dish Database ---
-    if (hint.includes("vada pav") || hint.includes("vadapav") || hint.includes("vada")) {
-      return { foodName: "Vada Pav", portionDescription: "1 piece (~120g)", quantity: 1, unit: "piece", weightGrams: 120, cals: 280, p: 6.0, c: 42.0, f: 11.5, fiber: 2.5, confidence: "high", ingredients: ["Pav (white bread bun)", "Spiced potato vada", "Chickpea flour batter", "Frying oil", "Green & tamarind chutney"], healthInsight: "Vada Pav is a high-carb snack (~42g carbs) with moderate fat from deep frying. Protein is low (~6g) as the primary components are potato and refined flour. Enjoy occasionally and pair with protein-rich dal." };
+    const hint = (userNote || "").toLowerCase();
+    if (hint.includes("curry") || hint.includes("paneer") || hint.includes("dal") || hint.includes("chicken") || hint.includes("rice")) {
+      return {
+        foodName: "High-Protein Platter with Dal & Vegetables",
+        portionDescription: "1 balanced portion (~380g)",
+        quantity: 1.0,
+        unit: "serving",
+        weightGrams: 380,
+        cals: 480,
+        p: 34,
+        c: 48,
+        f: 16,
+        fiber: 8,
+        confidence: "high",
+        ingredients: ["Protein source", "Yellow Dal", "Steamed basmati rice", "Seasonal greens"],
+        healthInsight: "Balanced macronutrient distribution with complete essential amino acids and gut-healthy fiber."
+      };
     }
-    if (hint.includes("samosa")) {
-      return { foodName: "Samosa", portionDescription: "1 piece (~90g)", quantity: 1, unit: "piece", weightGrams: 90, cals: 250, p: 4.5, c: 28.0, f: 14.0, fiber: 2.0, confidence: "high", ingredients: ["Refined wheat flour pastry", "Spiced potato & pea filling", "Frying oil"], healthInsight: "Samosa is a deep-fried snack with ~14g fat per piece. High carb from potato and maida. Protein is low (~4.5g). Limit to 1-2 per serving for calorie management." };
-    }
-    if (hint.includes("pav bhaji") || hint.includes("pavbhaji")) {
-      return { foodName: "Pav Bhaji", portionDescription: "2 pav + 150g bhaji", quantity: 1, unit: "plate", weightGrams: 300, cals: 420, p: 8.5, c: 58.0, f: 18.0, fiber: 6.0, confidence: "high", ingredients: ["Pav buns (2)", "Mashed mixed vegetables", "Butter", "Tomato-onion masala", "Coriander"], healthInsight: "Pav Bhaji is a calorie-dense street food with ~18g fat largely from butter. Good fiber (~6g) from mixed vegetables. Consider reducing butter and adding extra vegetables for a healthier version." };
-    }
-    if (hint.includes("poha")) {
-      return { foodName: "Poha", portionDescription: "1 bowl (~150g)", quantity: 1, unit: "bowl", weightGrams: 150, cals: 220, p: 4.2, c: 38.0, f: 6.0, fiber: 3.2, confidence: "high", ingredients: ["Flattened rice (poha)", "Onion", "Mustard seeds", "Curry leaves", "Peanuts", "Turmeric", "Oil"], healthInsight: "Poha is a light, easily digestible breakfast. Good source of iron. Adding peanuts improves protein content slightly. Lower calorie than most fried breakfast options." };
-    }
-    if (hint.includes("idli") || (hint.includes("sambar") && !hint.includes("dosa"))) {
-      return { foodName: "Idli with Sambar & Coconut Chutney", portionDescription: "2 idlis + sambar + chutney (~200g)", quantity: 2, unit: "piece", weightGrams: 200, cals: 180, p: 6.5, c: 34.0, f: 2.5, fiber: 3.5, confidence: "high", ingredients: ["Steamed rice-lentil idli (2)", "Sambar (vegetable lentil soup)", "Coconut chutney"], healthInsight: "One of the healthiest South Indian breakfasts — steamed, low fat, fermented for gut health. Sambar adds plant protein and fiber. Excellent for weight management." };
-    }
-    if (hint.includes("dosa") || hint.includes("masala dosa")) {
-      return { foodName: "Masala Dosa with Sambar", portionDescription: "1 regular dosa + sambar (~250g)", quantity: 1, unit: "piece", weightGrams: 250, cals: 330, p: 7.0, c: 48.0, f: 12.5, fiber: 4.0, confidence: "high", ingredients: ["Rice-lentil dosa crepe", "Spiced potato masala filling", "Coconut oil / ghee", "Sambar"], healthInsight: "Masala Dosa is a fermented crepe — better protein than plain rice dishes due to lentil batter. The potato filling raises carbs; opt for rava or moong dosa to reduce carb load." };
-    }
-    if (hint.includes("roti") || hint.includes("chapati") || hint.includes("chapatti")) {
-      return { foodName: "Roti / Chapati (Whole Wheat)", portionDescription: "1 medium roti (~40g)", quantity: 1, unit: "piece", weightGrams: 40, cals: 114, p: 3.2, c: 22.0, f: 0.8, fiber: 2.8, confidence: "high", ingredients: ["Whole wheat flour (atta)", "Water", "Minimal oil/ghee"], healthInsight: "Whole wheat roti is a high-fiber, low-fat staple. Pair with dal or sabzi for a nutritionally complete meal." };
-    }
-    if (hint.includes("dal") || hint.includes("daal") || hint.includes("tadka")) {
-      return { foodName: "Dal Tadka", portionDescription: "1 bowl (~150g)", quantity: 1, unit: "bowl", weightGrams: 150, cals: 155, p: 8.5, c: 20.0, f: 4.5, fiber: 4.5, confidence: "high", ingredients: ["Yellow lentils (toor/moong dal)", "Tomato", "Onion", "Cumin-mustard tadka", "Ghee"], healthInsight: "Dal Tadka is an excellent plant-protein source (~8.5g per bowl) with high fiber. Rich in folate and iron — an essential nutritional component of Indian meals." };
-    }
-    if (hint.includes("paneer tikka") || hint.includes("paneer bhurji") || hint.includes("paneer")) {
-      return { foodName: "Paneer Tikka / Bhurji", portionDescription: "~150g serving", quantity: 1, unit: "serving", weightGrams: 150, cals: 320, p: 18.5, c: 6.0, f: 24.0, fiber: 2.0, confidence: "high", ingredients: ["Cottage cheese (paneer)", "Bell peppers", "Onion", "Yogurt marinade", "Spices", "Oil"], healthInsight: "Paneer is a top vegetarian protein source (18.5g per serving) with complete amino acids. Higher in saturated fat (~24g) from dairy. Good choice for vegetarians targeting protein goals." };
-    }
-    if (hint.includes("biryani") || hint.includes("chicken biryani")) {
-      return { foodName: "Chicken Biryani", portionDescription: "1 plate (~300g)", quantity: 1, unit: "plate", weightGrams: 300, cals: 480, p: 26.0, c: 56.0, f: 16.0, fiber: 3.0, confidence: "high", ingredients: ["Basmati rice", "Chicken pieces", "Whole spices", "Fried onions", "Ghee/oil", "Saffron", "Yogurt marinade"], healthInsight: "Chicken Biryani provides a solid 26g protein from chicken. Carbs from rice are high (~56g). Use a larger chicken-to-rice ratio for better macro balance." };
-    }
-    if (hint.includes("egg") || hint.includes("boiled egg")) {
-      return { foodName: "Boiled Eggs", portionDescription: "2 whole eggs", quantity: 2, unit: "piece", weightGrams: 120, cals: 144, p: 12.6, c: 0.8, f: 10.0, fiber: 0.0, confidence: "high", ingredients: ["Whole eggs (2 large)"], healthInsight: "Eggs are a complete protein source (BV ~100) with all 9 essential amino acids. The yolk provides fat-soluble vitamins A, D, E, K and choline for brain health." };
-    }
-    if (hint.includes("curry") || hint.includes("chicken") || hint.includes("mutton")) {
-      return { foodName: "Indian Chicken Curry", portionDescription: "1 bowl (~200g)", quantity: 1, unit: "bowl", weightGrams: 200, cals: 310, p: 28.0, c: 8.0, f: 18.0, fiber: 2.0, confidence: "medium", ingredients: ["Chicken pieces", "Onion-tomato gravy", "Spices", "Oil"], healthInsight: "Chicken curry is a high-protein meal. Reduce oil/cream in the gravy to cut fat while retaining the full protein benefit." };
-    }
-    if (hint.includes("rice") || hint.includes("basmati")) {
-      return { foodName: "Steamed Basmati Rice", portionDescription: "1 cup / 200g cooked", quantity: 1, unit: "bowl", weightGrams: 200, cals: 260, p: 5.4, c: 56.0, f: 0.6, fiber: 1.0, confidence: "high", ingredients: ["Cooked basmati rice"], healthInsight: "White rice is a high-GI carbohydrate source low in protein (~5.4g). Pair with dal and vegetables for a balanced plate. Brown or parboiled rice provides more fiber." };
-    }
-
-    // --- Default Fallback (corrected — NOT the erroneous 32g protein bowl) ---
     return {
-      foodName: "Mixed Indian Meal",
-      portionDescription: "1 standard serving (~300g)",
+      foodName: "Balanced High-Protein Nutrient Bowl",
+      portionDescription: "1 standard serving (~350g)",
       quantity: 1.0,
       unit: "serving",
+      weightGrams: 350,
+      cals: 440,
+      p: 32,
+      c: 42,
+      f: 14,
+      fiber: 7,
+      confidence: "high",
+      ingredients: ["Lean protein", "Complex grains", "Steamed greens"],
       healthInsight: "Ideal macro balance supporting lean muscle retention and steady blood glucose."
     };
   },
@@ -862,3 +804,5 @@ ${userNote ? `User notes about this food: "${userNote}"` : ""}`;
 
 // Global attachment
 window.NutriAIAIService = NutriAIAIService;
+
+
