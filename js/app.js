@@ -132,6 +132,7 @@ const NutriAIApp = {
         appState.setLoggedIn(true, NutriAIData.defaultProfile);
         this.closeAllModals();
         this.showToast("Logged in successfully as Alex Morgan (Demo)", "success");
+        NutriAINav.navigateTo("dashboard");
       });
     }
 
@@ -140,15 +141,59 @@ const NutriAIApp = {
     if (loginForm) {
       loginForm.addEventListener("submit", async e => {
         e.preventDefault();
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
+        const emailInput = document.getElementById("loginEmail");
+        const passInput = document.getElementById("loginPassword");
+        const errEl = document.getElementById("loginErrorAlert");
+        const submitBtn = document.getElementById("loginSubmitBtn");
+
+        const email = emailInput?.value?.trim() || "";
+        const password = passInput?.value || "";
+
+        if (errEl) { errEl.style.display = "none"; errEl.innerHTML = ""; }
+
+        if (!email) {
+          if (errEl) { errEl.textContent = "Please enter your email address."; errEl.style.display = "block"; }
+          return;
+        }
+        if (!password) {
+          if (errEl) { errEl.textContent = "Please enter your password."; errEl.style.display = "block"; }
+          return;
+        }
+
         try {
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Signing In...";
+          }
+
           const res = await NutriAIAuthService.signIn(email, password);
           this.closeAllModals();
           const name = res.profile?.name || email.split("@")[0];
           this.showToast(`Welcome back, ${name}! Your profile is loaded. ✓`, "success");
+          NutriAINav.navigateTo("dashboard");
         } catch (err) {
+          if (errEl) {
+            const isNoAccount = err.message && (err.message.includes("No account found") || err.message.includes("Sign up"));
+            if (isNoAccount) {
+              errEl.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:0.4rem; text-align:left;">
+                  <div>⚠️ ${err.message}</div>
+                  <div style="margin-top:0.25rem;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="NutriAIApp.closeAllModals(); NutriAIApp.resetWizard?.(); NutriAIApp.openModal('modalWizard');" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">✨ Create Account Now</button>
+                  </div>
+                </div>
+              `;
+            } else {
+              errEl.textContent = err.message || "Failed to sign in. Please verify your credentials.";
+            }
+            errEl.style.display = "block";
+          }
           this.showToast(err.message || "Failed to sign in.", "error");
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Sign In";
+          }
         }
       });
     }
