@@ -88,7 +88,7 @@ const NutriAIReportService = {
     <div class="card">
       <div class="card-title">Daily Caloric Target</div>
       <div class="card-val">${targets.calories} <span style="font-size:13px; font-weight:600;">kcal</span></div>
-      <div class="card-sub">${p.goal === 'fat_loss' ? '-450 kcal Deficit' : 'Target Calorie Budget'}</div>
+      <div class="card-sub">${targets.deltaLabel || 'Calorie Target'}</div>
     </div>
     <div class="card">
       <div class="card-title">Basal Metabolic Rate</div>
@@ -123,23 +123,23 @@ const NutriAIReportService = {
         <td><strong>Protein Target</strong></td>
         <td><span class="badge badge-blue">${targets?.protein || 120} g / day</span></td>
         <td>${totals?.protein || 0} g logged</td>
-        <td>2.1g/kg bodyweight to maximize muscle protein synthesis and preserve lean tissue</td>
+        <td>1.6-2.0g/kg adjusted body mass to optimize muscle protein synthesis and metabolic health</td>
       </tr>
       <tr>
         <td><strong>Carbohydrate Target</strong></td>
         <td><span class="badge badge-amber">${targets?.carbs || 200} g / day</span></td>
         <td>${totals?.carbs || 0} g logged</td>
-        <td>Complex low-glycemic starches to support training energy and liver glycogen</td>
+        <td>Complex low-glycemic carbohydrates to support training energy and stable blood glucose</td>
       </tr>
       <tr>
         <td><strong>Essential Dietary Fats</strong></td>
         <td><span class="badge">${targets?.fats || 60} g / day</span></td>
         <td>${totals?.fats || 0} g logged</td>
-        <td>25% caloric ratio to support hormonal synthesis and fat-soluble vitamin absorption</td>
+        <td>25-28% caloric ratio to support hormonal synthesis and cellular membrane integrity</td>
       </tr>
       <tr>
         <td><strong>Dietary Fiber</strong></td>
-        <td><span class="badge">${targets?.fiber || 30} g / day</span></td>
+        <td><span class="badge">${targets?.fiber || 32} g / day</span></td>
         <td>${totals?.fiber || 0} g logged</td>
         <td>Prebiotic soluble and insoluble fibers for gut microbiome and glycemic control</td>
       </tr>
@@ -155,8 +155,8 @@ const NutriAIReportService = {
   <!-- Clinical Insights Callout -->
   <div class="callout">
     <strong>💡 NutriAI Clinical Assessment & Advisory:</strong><br/>
-    Client is adhering well to the <strong>${p?.dietPreference || 'Balanced'}</strong> nutritional protocol. Total daily energy expenditure (TDEE) is calculated at <strong>${targets?.tdee || 2200} kcal</strong>.
-    The prescribed caloric deficit of ~450 kcal creates an optimal energy differential for sustainable adipose loss at ~0.5kg/week with zero muscle catabolism.
+    Client is adhering well to the <strong>${p?.dietPreference || 'Balanced'}</strong> nutritional protocol. Total daily energy expenditure (TDEE) is calculated at <strong>${targets?.tdee || 2200} kcal</strong> (${targets?.palLabel || 'Activity'}).
+    The prescribed metabolic strategy (${targets?.deltaLabel || 'Caloric Target'}) creates an optimal energy balance aligned with ICMR-NIN and WHO clinical standards.
   </div>
 
   <!-- Weight Trajectory Log -->
