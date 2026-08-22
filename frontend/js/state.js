@@ -141,9 +141,10 @@ class NutriAIState {
       return null;
     }
 
-    // 1. BMI Calculation
+    // 1. BMI Calculation & Ideal Body Weight (IBW)
     const heightM = height / 100;
     const bmi = Number((weight / (heightM * heightM)).toFixed(1));
+    const idealBodyWeight = Number((22.5 * heightM * heightM).toFixed(1));
     let bmiCategory = "Normal";
     let bmiColor = "#10b981";
     let bmiPct = 0;
@@ -166,70 +167,120 @@ class NutriAIState {
       bmiPct = Math.min(100, 72 + ((bmi - 30) / 15) * 28);
     }
 
-    // 2. Mifflin-St Jeor BMR
-    let bmr = (10 * weight) + (6.25 * height) - (5 * age);
-    if (gender === "male") {
-      bmr += 5;
-    } else {
+    // Adjusted Body Weight (ABW) for BMI >= 25.0 to prevent BMR overestimation from adipose tissue
+    let effectiveWeight = weight;
+    if (bmi > 25.0) {
+      effectiveWeight = Number((idealBodyWeight + 0.25 * (weight - idealBodyWeight)).toFixed(1));
+    }
+
+    // 2. Mifflin-St Jeor BMR (using metabolically effective body mass)
+    let bmr = (10 * effectiveWeight) + (6.25 * height) - (5 * age);
+    if (gender === "female") {
       bmr -= 161;
+    } else {
+      bmr += 5;
     }
     bmr = Math.round(bmr);
 
-    // 3. TDEE Multipliers
+    // 3. Calibrated Physical Activity Level (PAL) Multipliers (WHO / FAO / ISSN Standards)
     const activityMultipliers = {
-      sedentary: 1.2,
-      light: 1.375,
-      moderate: 1.55,
-      high: 1.725,
-      athlete: 1.9
+      sedentary: 1.20,
+      light: 1.35,
+      moderate: 1.50,
+      high: 1.65,
+      very_active: 1.65,
+      athlete: 1.80
     };
-    const multiplier = activityMultipliers[p.activityLevel] || 1.55;
+    const actKey = (p.activityLevel || "moderate").toLowerCase();
+    const multiplier = activityMultipliers[actKey] || 1.50;
     const tdee = Math.round(bmr * multiplier);
 
-    // 4. Target Calories according to wellness & metabolic goal
-    let targetCalories = tdee;
-    if (p.goal === "weight_management" || p.goal === "fat_loss") {
-      targetCalories = Math.round(tdee - 400); // Sustainable deficit
-    } else if (p.goal === "muscle_strength" || p.goal === "muscle_gain") {
-      targetCalories = Math.round(tdee + 350); // Hypertrophy surplus
-    } else if (p.goal === "general_fitness" || p.goal === "recomposition") {
-      targetCalories = Math.round(tdee - 150); // Tone deficit
-    } else if (p.goal === "balanced_nutrition" || p.goal === "healthy_lifestyle" || p.goal === "maintenance") {
-      targetCalories = tdee; // Maintenance
-    }
-    // Safe minimum caloric floor
-    targetCalories = Math.max(1200, targetCalories);
+    // 4. Clinically Grounded Goal Energy Strategy & Calorie Deficit / Surplus (ICMR-NIN / USDA DGA)
+    let delta = 0;
+    let deltaLabel = "Maintenance budget";
+    const goal = (p.goal || "balanced_nutrition").toLowerCase();
 
-    // 5. Dynamic Macronutrient Targets
+    if (goal === "weight_management" || goal === "fat_loss" || goal === "lean_fat_loss") {
+      delta = -500;
+      deltaLabel = "-500 kcal deficit (Fat Loss)";
+    } else if (goal === "general_fitness" || goal === "recomposition" || goal === "body_recomp") {
+      if (bmi >= 25.0) {
+        delta = -350;
+        deltaLabel = "-350 kcal deficit (Recomposition)";
+      } else if (bmi < 18.5) {
+        delta = 200;
+        deltaLabel = "+200 kcal surplus (Lean Gain)";
+      } else {
+        delta = -150;
+        deltaLabel = "-150 kcal deficit (Active Tone)";
+      }
+    } else if (goal === "muscle_strength" || goal === "muscle_gain" || goal === "hypertrophy") {
+      if (bmi < 25.0) {
+        delta = 200;
+        deltaLabel = "+200 kcal surplus (Hypertrophy)";
+      } else {
+        delta = -200;
+        deltaLabel = "-200 kcal deficit (Lean Recomp)";
+      }
+    } else {
+      // balanced_nutrition, healthy_lifestyle, maintenance
+      if (bmi >= 25.0) {
+        delta = -250;
+        deltaLabel = "-250 kcal deficit (Health Support)";
+      } else {
+        delta = 0;
+        deltaLabel = "Maintenance budget";
+      }
+    }
+
+    let targetCalories = tdee + delta;
+
+    // Standard clinical safety ceilings & floors
+    if (gender === "female") {
+      targetCalories = Math.max(1200, Math.min(actKey === "athlete" ? 2250 : 2050, targetCalories));
+    } else {
+      targetCalories = Math.max(1450, Math.min(actKey === "athlete" ? 2750 : 2450, targetCalories));
+    }
+
+    // 5. Dynamic Macronutrient Targets (Grounded in ICMR-NIN / ISSN Clinical Ratios)
     let targetProteinGrams, targetFatGrams, targetCarbsGrams;
     const diet = (p.dietPreference || "balanced").toLowerCase();
 
     if (diet === "keto") {
-      targetCarbsGrams = 35;
-      targetProteinGrams = Math.round(weight * 1.8);
-      targetFatGrams = Math.round((targetCalories - (targetProteinGrams * 4) - (targetCarbsGrams * 4)) / 9);
-    } else if (diet === "vegan") {
-      targetProteinGrams = Math.round(weight * 1.8);
+      targetCarbsGrams = 30;
+      targetProteinGrams = Math.round(effectiveWeight * 1.8);
+      targetFatGrams = Math.max(30, Math.round((targetCalories - (targetProteinGrams * 4) - (targetCarbsGrams * 4)) / 9));
+    } else if (diet === "vegan" || diet === "plant_based") {
+      targetProteinGrams = Math.round(effectiveWeight * 1.6);
       targetFatGrams = Math.round((targetCalories * 0.25) / 9);
       targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
     } else if (diet === "vegetarian") {
-      targetProteinGrams = Math.round(weight * 1.9);
-      targetFatGrams = Math.round((targetCalories * 0.28) / 9);
-      targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
-    } else if (diet === "eggetarian") {
-      targetProteinGrams = Math.round(weight * 2.0);
+      targetProteinGrams = Math.round(effectiveWeight * 1.7);
       targetFatGrams = Math.round((targetCalories * 0.27) / 9);
       targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
+    } else if (diet === "eggetarian") {
+      targetProteinGrams = Math.round(effectiveWeight * 1.8);
+      targetFatGrams = Math.round((targetCalories * 0.26) / 9);
+      targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
     } else if (diet === "pescatarian") {
-      targetProteinGrams = Math.round(weight * 2.0);
-      targetFatGrams = Math.round((targetCalories * 0.28) / 9);
+      targetProteinGrams = Math.round(effectiveWeight * 1.8);
+      targetFatGrams = Math.round((targetCalories * 0.26) / 9);
       targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
     } else {
-      // Balanced Omnivore
-      targetProteinGrams = Math.round(weight * 2.1);
-      targetFatGrams = Math.round((targetCalories * 0.25) / 9);
+      // Balanced Omnivore / Mediterranean
+      targetProteinGrams = Math.round(effectiveWeight * 1.8);
+      targetFatGrams = Math.round((targetCalories * 0.26) / 9);
       targetCarbsGrams = Math.max(50, Math.round((targetCalories - (targetProteinGrams * 4) - (targetFatGrams * 9)) / 4));
     }
+
+    const palNames = {
+      sedentary: "Sedentary (1.20x)",
+      light: "Light activity (1.35x)",
+      moderate: "Moderate activity (1.50x)",
+      high: "Very active (1.65x)",
+      very_active: "Very active (1.65x)",
+      athlete: "Athlete (1.80x)"
+    };
 
     this.targets = {
       bmr,
@@ -242,9 +293,12 @@ class NutriAIState {
       protein: targetProteinGrams,
       carbs: targetCarbsGrams,
       fats: targetFatGrams,
+      deltaLabel,
+      palLabel: palNames[actKey] || `Activity (${multiplier.toFixed(2)}x)`,
       water: Number(p.waterTarget) || 3200,
       fiber: 32
     };
+  }
   }
 
   // --- Profile Completion Calculator ---
