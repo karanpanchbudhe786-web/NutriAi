@@ -1289,56 +1289,28 @@ const NutriAIApp = {
       if (loading) loading.style.display = "block";
       if (dropzone) dropzone.classList.add("ai-scanning-active");
 
-      // Build the best possible hint: use whatever the user has already typed in the food name field
-      const typedFoodName = document.getElementById("foodNameInput")?.value?.trim() || "";
-      const hasApiKey = NutriAIAIService.hasApiKey();
-
-      // If no API key and no typed name, show a prompt banner so the user can type the dish name
-      if (!hasApiKey && !typedFoodName) {
-        const hint = document.getElementById("foodPortionHint");
-        if (hint) {
-          hint.innerHTML = `<span>💡</span> <span><strong>No API key detected.</strong> Type the dish name above (e.g. "Vada Pav", "Biryani", "Idli") and re-upload or click the dropzone again to get accurate macros.</span>`;
-          hint.style.display = "flex";
-          hint.style.background = "#fff8e1";
-          hint.style.borderColor = "#f59e0b";
-        }
-      }
-
       try {
-        // Use typed food name as primary hint for keyword matching when no API key
-        const userHint = typedFoodName || "";
-        const analysis = await NutriAIAIService.analyzeFoodPhoto(base64Data, this.currentPhotoMimeType, userHint, appState);
+        const analysis = await NutriAIAIService.analyzeFoodPhoto(base64Data, this.currentPhotoMimeType, "", appState);
 
-        // Auto-fill food item name (prefer AI result, but don't overwrite if user typed something clearer)
-        if (analysis.foodName && analysis.foodName !== "Mixed Indian Meal") {
+        // Auto-fill food item name
+        if (analysis.foodName) {
           document.getElementById("foodNameInput").value = analysis.foodName;
-        } else if (typedFoodName) {
-          document.getElementById("foodNameInput").value = typedFoodName;
-        } else {
-          document.getElementById("foodNameInput").value = analysis.foodName || "Detected Meal";
         }
 
         // Set baseline nutrition and portion scaling
         this.setBaseFoodNutrition({
-          name: document.getElementById("foodNameInput").value,
-          cals: analysis.cals || 350,
-          p: analysis.p || 10,
-          c: analysis.c || 45,
-          f: analysis.f || 12,
-          fiber: analysis.fiber || 4,
+          name: analysis.foodName || "Detected Meal",
+          cals: analysis.cals || 450,
+          p: analysis.p || 30,
+          c: analysis.c || 40,
+          f: analysis.f || 15,
+          fiber: analysis.fiber || 5,
           qty: analysis.quantity || 1.0,
           unit: analysis.unit || "serving",
-          weightGrams: analysis.weightGrams || 250,
           portionDescription: analysis.portionDescription || (analysis.weightGrams ? `~${analysis.weightGrams}g` : "1 standard serving")
         });
 
-        // If no API key, prompt the user to verify/correct the result
-        if (!hasApiKey) {
-          const detectedName = document.getElementById("foodNameInput").value;
-          this.showToast(`📷 Identified: "${detectedName}" (${analysis.cals} kcal). No API key — type the exact dish name for better accuracy! 💡`, "info");
-        } else {
-          this.showToast(`✅ AI Identified: "${analysis.foodName}" (${analysis.cals} kcal). Adjust quantity if needed! ✨`, "success");
-        }
+        this.showToast(`AI Identified: "${analysis.foodName}" (${analysis.cals} kcal). Adjust quantity if needed! ✨`, "success");
       } catch (err) {
         this.showToast("Could not analyze photo: " + err.message, "error");
       } finally {
@@ -1348,6 +1320,7 @@ const NutriAIApp = {
     };
     reader.readAsDataURL(file);
   },
+
 
 
   resetPhotoScanner() {
