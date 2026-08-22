@@ -726,6 +726,8 @@ Hello ${profile.name || "there"}! I am your AI clinical sports dietitian. Here i
 - 🥩 **Ask nutrition facts:** *"How much protein is in chicken?"*
 - 🔄 **Ask for food swaps:** *"Replace chicken with vegetarian food"*
 - 📊 **Check your tracking:** *"How many calories do I have left?"*`;
+  },
+
   // --- Multimodal Photo Scanner & Custom Plan Generators ---
   async analyzeFoodPhoto(base64Data, mimeType = "image/jpeg", userNote = "", state = null) {
     const apiKey = this.getApiKey();
