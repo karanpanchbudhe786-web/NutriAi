@@ -138,6 +138,8 @@ def calculate_metabolic_targets(profile: dict) -> dict:
     # 1. BMI Calculation
     height_m = height / 100.0
     bmi = round(weight / (height_m * height_m), 1)
+    ideal_bw = round(22.5 * height_m * height_m, 1)
+
     if bmi < 18.5:
         bmi_category = "Underweight"
     elif bmi < 25.0:
@@ -147,57 +149,107 @@ def calculate_metabolic_targets(profile: dict) -> dict:
     else:
         bmi_category = "Obese"
 
-    # 2. Mifflin-St Jeor BMR
+    # Adjusted Body Weight (ABW) for BMI >= 25.0 to prevent adiposity metabolic inflation
+    if bmi > 25.0:
+        effective_weight = round(ideal_bw + 0.25 * (weight - ideal_bw), 1)
+    else:
+        effective_weight = weight
+
+    # 2. Mifflin-St Jeor BMR with adjusted metabolic weight
     if gender.lower() == "female":
-        bmr = round(10.0 * weight + 6.25 * height - 5.0 * age - 161.0)
+        bmr = round(10.0 * effective_weight + 6.25 * height - 5.0 * age - 161.0)
     else:
-        bmr = round(10.0 * weight + 6.25 * height - 5.0 * age + 5.0)
+        bmr = round(10.0 * effective_weight + 6.25 * height - 5.0 * age + 5.0)
 
-    # 3. TDEE Multipliers
+    # 3. Calibrated Physical Activity Level (PAL) Multipliers (WHO / FAO / ISSN)
     activity_multipliers = {
-        "sedentary": 1.2,
-        "light": 1.375,
-        "moderate": 1.55,
-        "high": 1.725,
-        "athlete": 1.9
+        "sedentary": 1.20,
+        "light": 1.35,
+        "moderate": 1.50,
+        "high": 1.65,
+        "very_active": 1.65,
+        "athlete": 1.80
     }
-    tdee = round(bmr * activity_multipliers.get(activity.lower(), 1.55))
+    act_key = activity.lower()
+    pal = activity_multipliers.get(act_key, 1.50)
+    tdee = round(bmr * pal)
 
-    # 4. Calorie Target by Goal
-    if goal in ["fat_loss", "lean_fat_loss"]:
-        target_calories = max(1200, tdee - 450)
-    elif goal in ["muscle_gain", "hypertrophy"]:
-        target_calories = tdee + 350
-    elif goal in ["recomposition", "body_recomp"]:
-        target_calories = tdee - 150
-    elif goal in ["weight_management"]:
-        target_calories = tdee - 200
+    # 4. Clinically Grounded Goal Energy Strategy (ICMR-NIN / USDA DGA)
+    delta = 0
+    delta_label = "Maintenance budget"
+    goal_lower = goal.lower()
+
+    if goal_lower in ["weight_management", "fat_loss", "lean_fat_loss"]:
+        delta = -500
+        delta_label = "-500 kcal deficit (Fat Loss)"
+    elif goal_lower in ["general_fitness", "recomposition", "body_recomp"]:
+        if bmi >= 25.0:
+            delta = -350
+            delta_label = "-350 kcal deficit (Recomposition)"
+        elif bmi < 18.5:
+            delta = 200
+            delta_label = "+200 kcal surplus (Lean Gain)"
+        else:
+            delta = -150
+            delta_label = "-150 kcal deficit (Active Tone)"
+    elif goal_lower in ["muscle_gain", "hypertrophy", "muscle_strength"]:
+        if bmi < 25.0:
+            delta = 200
+            delta_label = "+200 kcal surplus (Hypertrophy)"
+        else:
+            delta = -200
+            delta_label = "-200 kcal deficit (Lean Recomp)"
+    else: # balanced_nutrition, healthy_lifestyle, maintenance
+        if bmi >= 25.0:
+            delta = -250
+            delta_label = "-250 kcal deficit (Health Support)"
+        else:
+            delta = 0
+            delta_label = "Maintenance budget"
+
+    target_calories = tdee + delta
+
+    # Standard clinical safety ceilings & floors
+    if gender.lower() == "female":
+        target_calories = max(1200, min(2250 if act_key == "athlete" else 2050, target_calories))
     else:
-        target_calories = tdee
+        target_calories = max(1450, min(2750 if act_key == "athlete" else 2450, target_calories))
 
-    # 5. Macronutrient Splits
+    # 5. Dynamic Macronutrient Targets (Grounded in ICMR-NIN / ISSN Clinical Standards)
     diet_lower = diet.lower()
     if diet_lower == "keto":
-        target_protein = round(weight * 2.0)
+        target_protein = round(effective_weight * 1.8)
         target_carbs = 30
         target_fats = max(30, round((target_calories - (target_protein * 4) - (target_carbs * 4)) / 9))
     elif diet_lower in ["vegan", "plant_based"]:
-        target_protein = round(weight * 1.8)
+        target_protein = round(effective_weight * 1.6)
         target_fats = round((target_calories * 0.25) / 9)
         target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
     elif diet_lower == "vegetarian":
-        target_protein = round(weight * 1.9)
-        target_fats = round((target_calories * 0.28) / 9)
-        target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
-    elif diet_lower == "eggetarian":
-        target_protein = round(weight * 2.0)
+        target_protein = round(effective_weight * 1.7)
         target_fats = round((target_calories * 0.27) / 9)
         target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
-    else:
-        # Balanced Omnivore / Mediterranean
-        target_protein = round(weight * 2.1)
-        target_fats = round((target_calories * 0.25) / 9)
+    elif diet_lower == "eggetarian":
+        target_protein = round(effective_weight * 1.8)
+        target_fats = round((target_calories * 0.26) / 9)
         target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
+    elif diet_lower == "pescatarian":
+        target_protein = round(effective_weight * 1.8)
+        target_fats = round((target_calories * 0.26) / 9)
+        target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
+    else: # Balanced Omnivore / Mediterranean
+        target_protein = round(effective_weight * 1.8)
+        target_fats = round((target_calories * 0.26) / 9)
+        target_carbs = max(50, round((target_calories - (target_protein * 4) - (target_fats * 9)) / 4))
+
+    pal_names = {
+        "sedentary": "Sedentary (1.20x)",
+        "light": "Light activity (1.35x)",
+        "moderate": "Moderate activity (1.50x)",
+        "high": "Very active (1.65x)",
+        "very_active": "Very active (1.65x)",
+        "athlete": "Athlete (1.80x)"
+    }
 
     return {
         "bmr": bmr,
@@ -208,6 +260,8 @@ def calculate_metabolic_targets(profile: dict) -> dict:
         "protein": target_protein,
         "carbs": target_carbs,
         "fats": target_fats,
+        "deltaLabel": delta_label,
+        "palLabel": pal_names.get(act_key, f"Activity ({pal:.2f}x)"),
         "fiber": 32,
         "water": int(profile.get("water_target") or profile.get("waterTarget") or 3200)
     }
