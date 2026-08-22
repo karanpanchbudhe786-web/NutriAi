@@ -419,7 +419,7 @@ const NutriAIApp = {
 
         try {
           this.showToast("Generating custom 7-day culinary plan with AI...", "info");
-          const customPlan = await NutriAIAIService.generateCustom7DayPlan(promptText, appState);
+          const customPlan = await (window.NutriAIAIService || NutriAIAIService).generateCustom7DayPlan(promptText, appState);
           
           if (customPlan && typeof customPlan === "object") {
             // Merge into NutriAIData
@@ -748,14 +748,15 @@ const NutriAIApp = {
     const clearKeyBtn = document.getElementById("clearApiKeyBtn");
 
     if (apiKeyInput) {
-      apiKeyInput.value = NutriAIAIService.getApiKey();
+      const svc = window.NutriAIAIService;
+      apiKeyInput.value = svc ? svc.getApiKey() : "";
     }
 
     if (apiKeyForm) {
       apiKeyForm.addEventListener("submit", e => {
         e.preventDefault();
         const key = apiKeyInput?.value?.trim();
-        NutriAIAIService.setApiKey(key);
+        if (window.NutriAIAIService) window.NutriAIAIService.setApiKey(key);
         this.updateApiKeyStatus();
         this.showToast("Google Gemini API Key saved securely!", "success");
       });
@@ -763,7 +764,7 @@ const NutriAIApp = {
 
     if (clearKeyBtn) {
       clearKeyBtn.addEventListener("click", () => {
-        NutriAIAIService.setApiKey("");
+        if (window.NutriAIAIService) window.NutriAIAIService.setApiKey("");
         if (apiKeyInput) apiKeyInput.value = "";
         this.updateApiKeyStatus();
         this.showToast("API Key cleared (offline mode active).", "info");
@@ -839,7 +840,9 @@ const NutriAIApp = {
 
   updateApiKeyStatus() {
     const badge = document.getElementById("apiKeyStatusBadge");
-    const hasKey = NutriAIAIService.hasApiKey();
+    const svc = window.NutriAIAIService;
+    if (!svc) return; // aiService.js not yet loaded
+    const hasKey = svc.hasApiKey();
     if (badge) {
       badge.textContent = hasKey ? "Live Gemini Active ✨" : "Demo Mode";
       badge.className = `badge ${hasKey ? "badge-emerald" : "badge-gray"}`;
@@ -949,7 +952,11 @@ const NutriAIApp = {
     try {
       const nutritionState = appState.getNutritionState();
       const profile = appState.data.profile;
-      const responseText = await NutriAIAIService.chatWithNutritionist(message, this.chatHistory, nutritionState, profile);
+      const aiService = window.NutriAIAIService;
+      if (!aiService || typeof aiService.chatWithNutritionist !== "function") {
+        throw new Error("AI Service is loading or not available.");
+      }
+      const responseText = await aiService.chatWithNutritionist(message, this.chatHistory, nutritionState, profile);
       
       // Remove typing indicator
       const typingEl = document.getElementById(typingId);
@@ -1290,7 +1297,10 @@ const NutriAIApp = {
       if (dropzone) dropzone.classList.add("ai-scanning-active");
 
       try {
-        const analysis = await NutriAIAIService.analyzeFoodPhoto(base64Data, this.currentPhotoMimeType, "", appState);
+        const aiService = window.NutriAIAIService;
+        const analysis = aiService && typeof aiService.analyzeFoodPhoto === "function"
+          ? await aiService.analyzeFoodPhoto(base64Data, this.currentPhotoMimeType, "", appState)
+          : { foodName: "Logged Meal", cals: 450, p: 30, c: 40, f: 15, fiber: 5, quantity: 1, unit: "serving", portionDescription: "1 serving" };
 
         // Auto-fill food item name
         if (analysis.foodName) {
