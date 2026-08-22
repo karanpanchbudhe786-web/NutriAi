@@ -386,89 +386,130 @@ const NutriAIAuthService = {
   },
 
   /**
-   * User Sign-In (Local Database + Dedicated Backend + Cloud Fallback)
+   * User Sign-In (Local Database → Backend API → Supabase)
+   * 
+   * Priority:
+   * 1. Local usersDb (instantaneous, always tried first)
+   * 2. Remote Backend (with 8s timeout, skipped if local succeeded)
+   * 3. Supabase Cloud (if configured)
    */
   async signIn(email, password) {
     const emailNorm = (email || "").toLowerCase().trim();
     if (!emailNorm) throw new Error("Please enter your email address.");
-    if (!password) throw new Error("Please enter your password.");
+    if (!password || password.length < 1) throw new Error("Please enter your password.");
 
     const passwordHash = await this.hashPassword(password);
     const usersDb = this.getUsersDb();
     let userRecord = usersDb[emailNorm];
+    let authSource = "local";
 
-    // 1. If not found locally, try Remote Backend API
-    if (!userRecord && typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.login) {
+    // ─── PHASE 1: Local password verification ───────────────────────────────
+    if (userRecord) {
+      const localValid = (userRecord.passwordHash === passwordHash) ||
+                         (userRecord.password && userRecord.password === password);
+      if (!localValid) {
+        // Local record exists but password doesn't match — definitive failure
+        throw new Error("Incorrect password. Please try again, or use 'Forgot password'.");
+      }
+      // Local auth successful — skip remote calls
+    }
+
+    // ─── PHASE 2: Remote Backend API (only if not found locally) ────────────
+    if (!userRecord) {
+      const hasApiClient = typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.login;
+      if (hasApiClient) {
+        try {
+          // 8-second timeout so Render cold-starts don't block login forever
+          const backendPromise = NutriAIApiClient.login(emailNorm, password);
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("BACKEND_TIMEOUT")), 8000)
+          );
+          const backendRes = await Promise.race([backendPromise, timeoutPromise]);
+
+          if (backendRes && (backendRes.token || backendRes.user || backendRes.profile)) {
+            authSource = "backend";
+            const profile = backendRes.profile || backendRes.user || { email: emailNorm, name: emailNorm.split("@")[0] };
+            // Normalise profile fields
+            profile.email = profile.email || emailNorm;
+            profile.name = profile.name || profile.fullName || emailNorm.split("@")[0];
+            userRecord = {
+              userId: profile.userId || backendRes.user?.id || ("usr_" + Math.random().toString(36).substr(2, 9)),
+              passwordHash,
+              profile,
+              trackingData: backendRes.trackingData || null
+            };
+            usersDb[emailNorm] = userRecord;
+            this.saveUsersDb(usersDb);
+          }
+        } catch (backendErr) {
+          if (backendErr.message === "BACKEND_TIMEOUT") {
+            console.warn("⏱ Backend login timed out — proceeding with local auth only.");
+          } else if (backendErr.status === 401) {
+            throw new Error("Incorrect password. Please try again.");
+          } else if (backendErr.status === 404) {
+            // Email not in backend — continue to Supabase or show sign-up
+          } else {
+            console.warn("Backend login error:", backendErr.message);
+          }
+        }
+      }
+    }
+
+    // ─── PHASE 3: Supabase Cloud Auth fallback ──────────────────────────────
+    if (!userRecord && this.supabaseClient) {
       try {
-        const backendRes = await NutriAIApiClient.login(emailNorm, password);
-        if (backendRes && (backendRes.token || backendRes.user || backendRes.profile)) {
-          const profile = backendRes.profile || backendRes.user || { email: emailNorm, name: emailNorm.split("@")[0] };
-          userRecord = {
-            userId: profile.userId || backendRes.user?.id || ("usr_" + Math.random().toString(36).substr(2, 9)),
-            passwordHash,
-            profile,
-            trackingData: backendRes.trackingData || null
-          };
+        const { data, error } = await this.supabaseClient.auth.signInWithPassword({ email: emailNorm, password });
+        if (error) {
+          if (error.message && (error.message.includes("Invalid") || error.message.includes("credentials"))) {
+            throw new Error("Incorrect email or password. Please try again.");
+          }
+        } else if (data?.user) {
+          authSource = "supabase";
+          const user = data.user;
+          const name = user.user_metadata?.full_name || emailNorm.split("@")[0];
+          const profile = user.user_metadata?.profile || { email: emailNorm, name };
+          profile.email = profile.email || emailNorm;
+          userRecord = { userId: user.id, passwordHash, profile };
           usersDb[emailNorm] = userRecord;
           this.saveUsersDb(usersDb);
         }
-      } catch (backendErr) {
-        if (backendErr.status === 401 || (backendErr.message && backendErr.message.toLowerCase().includes("password"))) {
-          throw new Error("Incorrect password. Please try again.");
-        }
-      }
-    }
-
-    // 2. If still not found, try Supabase Cloud Auth if configured
-    if (!userRecord && this.supabaseClient) {
-      try {
-        const { data, error } = await this.supabaseClient.auth.signInWithPassword({
-          email: emailNorm,
-          password
-        });
-        if (error) throw error;
-        const user = data.user;
-        const name = user.user_metadata?.full_name || emailNorm.split("@")[0];
-        const profile = user.user_metadata?.profile || { email: emailNorm, name };
-        userRecord = {
-          userId: user.id,
-          passwordHash,
-          profile
-        };
-        usersDb[emailNorm] = userRecord;
-        this.saveUsersDb(usersDb);
       } catch (supaErr) {
-        if (supaErr.message && supaErr.message.includes("Invalid login")) {
-          throw new Error("Incorrect email or password. Please try again.");
-        }
+        if (supaErr.message && !supaErr.message.includes("supabase")) throw supaErr;
+        console.warn("Supabase auth skipped:", supaErr.message);
       }
     }
 
-    // 3. If no user record found anywhere
+    // ─── PHASE 4: If still no user record → account does not exist ──────────
     if (!userRecord) {
-      // Check if user is logging in with demo credentials
-      if (emailNorm === "alex@nutriai.demo" || emailNorm === "demo@nutriai.com" || emailNorm === "demo") {
-        appState.setLoggedIn(true, NutriAIData.defaultProfile);
-        return { success: true, profile: NutriAIData.defaultProfile, user: NutriAIData.defaultProfile };
+      // Check demo shortcut
+      if (emailNorm === "alex@nutriai.demo" || emailNorm === "demo@nutriai.com" || password === "demo123") {
+        const demoProfile = { ...NutriAIData.defaultProfile };
+        localStorage.setItem(this.CURRENT_USER_KEY, demoProfile.email || "alex@nutriai.demo");
+        localStorage.setItem("nutriai_user_email", demoProfile.email || "alex@nutriai.demo");
+        appState.data.isLoggedIn = true;
+        appState.data.profile = demoProfile;
+        appState.recalculateTargets();
+        appState.saveState();
+        return { success: true, profile: demoProfile, user: demoProfile };
       }
-      throw new Error(`No account found for "${emailNorm}". Please click "Sign up" below to create your profile in 3 simple steps.`);
+      throw new Error(`No account found for "${emailNorm}". Please click "Sign up" below to create your profile.`);
     }
 
-    // 4. Verify password
-    const isPasswordValid = (userRecord.passwordHash === passwordHash) ||
-                            (userRecord.password && userRecord.password === password) ||
-                            (password === "demo123");
-    if (!isPasswordValid) {
-      throw new Error("Incorrect password. Please verify your password and try again.");
-    }
-
-    // 5. Restore full profile & tracking data into appState
+    // ─── PHASE 5: Restore session into appState ─────────────────────────────
     localStorage.setItem(this.CURRENT_USER_KEY, emailNorm);
     localStorage.setItem("nutriai_user_email", emailNorm);
+
+    // Ensure profile has required fields
+    const resolvedProfile = {
+      ...NutriAIData.defaultProfile,
+      ...userRecord.profile,
+      email: emailNorm
+    };
+
     appState.data.isLoggedIn = true;
-    appState.data.profile = { ...userRecord.profile };
-    
-    // Restore tracking data if saved, or clean 0
+    appState.data.profile = resolvedProfile;
+
+    // Restore tracking data if backend returned it
     if (userRecord.trackingData) {
       appState.data.checkedMeals = userRecord.trackingData.checkedMeals || {};
       appState.data.todayFoodLogs = userRecord.trackingData.todayFoodLogs || [];
@@ -485,7 +526,8 @@ const NutriAIAuthService = {
     appState.recalculateTargets();
     appState.saveState();
 
-    return { success: true, profile: userRecord.profile, user: userRecord.profile };
+    console.log(`✅ NutriAI: Authenticated "${emailNorm}" via ${authSource}`);
+    return { success: true, profile: resolvedProfile, user: resolvedProfile };
   },
 
   /**
