@@ -800,7 +800,9 @@ ${userNote ? `User notes about this food: "${userNote}"` : ""}`;
   },
 
   generateSimulatedFoodPhotoAnalysis(userNote, state) {
-    const hint = (userNote || "").toLowerCase();
+    // Combine userNote with whatever is typed in the food name input for the best possible keyword match
+    const typedName = (typeof document !== "undefined" && document.getElementById?.("foodNameInput")?.value) || "";
+    const hint = ((userNote || "") + " " + typedName).toLowerCase().trim();
 
     // --- ICMR-NIN Verified Indian Street Food & Traditional Dish Database ---
     if (hint.includes("vada pav") || hint.includes("vadapav") || hint.includes("vada")) {
