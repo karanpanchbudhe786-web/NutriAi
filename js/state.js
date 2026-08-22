@@ -334,10 +334,18 @@ class NutriAIState {
   }
 
   setLoggedIn(status, user = null) {
-    this.data.isLoggedIn = status;
-    if (user) {
-      this.data.profile = { ...this.data.profile, ...user };
+    this.data.isLoggedIn = Boolean(status);
+    if (status) {
+      if (user) {
+        this.data.profile = { ...NutriAIData.defaultProfile, ...this.data.profile, ...user };
+      }
+      const email = this.data.profile?.email || "demo_user";
+      localStorage.setItem("nutriai_active_user_v3", email);
+      localStorage.setItem("nutriai_user_email", email);
       this.recalculateTargets();
+    } else {
+      this.logout();
+      return;
     }
     this.saveState();
   }
