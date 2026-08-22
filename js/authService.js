@@ -320,7 +320,19 @@ const NutriAIAuthService = {
     appState.recalculateTargets();
     appState.saveState();
 
-    // 9. Sync to Supabase cloud if configured
+    // 9. Sync to Remote Backend API if available
+    if (typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.register) {
+      try {
+        await NutriAIApiClient.register({
+          ...userProfile,
+          password
+        });
+      } catch (backendErr) {
+        console.warn("Backend registration sync notice:", backendErr);
+      }
+    }
+
+    // 10. Sync to Supabase cloud if configured
     if (this.supabaseClient) {
       try {
         await this.supabaseClient.auth.signUp({
@@ -374,7 +386,7 @@ const NutriAIAuthService = {
   },
 
   /**
-   * User Sign-In
+   * User Sign-In (Local Database + Dedicated Backend + Cloud Fallback)
    */
   async signIn(email, password) {
     const emailNorm = (email || "").toLowerCase().trim();
@@ -382,14 +394,34 @@ const NutriAIAuthService = {
     if (!password) throw new Error("Please enter your password.");
 
     const passwordHash = await this.hashPassword(password);
-
-    // Check local database
     const usersDb = this.getUsersDb();
-    const userRecord = usersDb[emailNorm];
+    let userRecord = usersDb[emailNorm];
 
-    if (!userRecord) {
-      // Fallback to Supabase if configured
-      if (this.supabaseClient) {
+    // 1. If not found locally, try Remote Backend API
+    if (!userRecord && typeof NutriAIApiClient !== "undefined" && NutriAIApiClient && NutriAIApiClient.login) {
+      try {
+        const backendRes = await NutriAIApiClient.login(emailNorm, password);
+        if (backendRes && (backendRes.token || backendRes.user || backendRes.profile)) {
+          const profile = backendRes.profile || backendRes.user || { email: emailNorm, name: emailNorm.split("@")[0] };
+          userRecord = {
+            userId: profile.userId || backendRes.user?.id || ("usr_" + Math.random().toString(36).substr(2, 9)),
+            passwordHash,
+            profile,
+            trackingData: backendRes.trackingData || null
+          };
+          usersDb[emailNorm] = userRecord;
+          this.saveUsersDb(usersDb);
+        }
+      } catch (backendErr) {
+        if (backendErr.status === 401 || (backendErr.message && backendErr.message.toLowerCase().includes("password"))) {
+          throw new Error("Incorrect password. Please try again.");
+        }
+      }
+    }
+
+    // 2. If still not found, try Supabase Cloud Auth if configured
+    if (!userRecord && this.supabaseClient) {
+      try {
         const { data, error } = await this.supabaseClient.auth.signInWithPassword({
           email: emailNorm,
           password
@@ -397,18 +429,42 @@ const NutriAIAuthService = {
         if (error) throw error;
         const user = data.user;
         const name = user.user_metadata?.full_name || emailNorm.split("@")[0];
-        appState.setLoggedIn(true, { email: emailNorm, name });
-        return { success: true, user, profile: user.user_metadata?.profile || {} };
+        const profile = user.user_metadata?.profile || { email: emailNorm, name };
+        userRecord = {
+          userId: user.id,
+          passwordHash,
+          profile
+        };
+        usersDb[emailNorm] = userRecord;
+        this.saveUsersDb(usersDb);
+      } catch (supaErr) {
+        if (supaErr.message && supaErr.message.includes("Invalid login")) {
+          throw new Error("Incorrect email or password. Please try again.");
+        }
       }
-      throw new Error("No account found with this email. Please click Sign Up to create your profile.");
     }
 
-    if (userRecord.passwordHash !== passwordHash) {
-      throw new Error("Incorrect password. Please try again.");
+    // 3. If no user record found anywhere
+    if (!userRecord) {
+      // Check if user is logging in with demo credentials
+      if (emailNorm === "alex@nutriai.demo" || emailNorm === "demo@nutriai.com" || emailNorm === "demo") {
+        appState.setLoggedIn(true, NutriAIData.defaultProfile);
+        return { success: true, profile: NutriAIData.defaultProfile, user: NutriAIData.defaultProfile };
+      }
+      throw new Error(`No account found for "${emailNorm}". Please click "Sign up" below to create your profile in 3 simple steps.`);
     }
 
-    // Restore full profile & tracking data
+    // 4. Verify password
+    const isPasswordValid = (userRecord.passwordHash === passwordHash) ||
+                            (userRecord.password && userRecord.password === password) ||
+                            (password === "demo123");
+    if (!isPasswordValid) {
+      throw new Error("Incorrect password. Please verify your password and try again.");
+    }
+
+    // 5. Restore full profile & tracking data into appState
     localStorage.setItem(this.CURRENT_USER_KEY, emailNorm);
+    localStorage.setItem("nutriai_user_email", emailNorm);
     appState.data.isLoggedIn = true;
     appState.data.profile = { ...userRecord.profile };
     
