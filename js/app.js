@@ -35,16 +35,26 @@ const NutriAIApp = {
     window.addEventListener("resize", () => this.renderCharts());
     window.addEventListener("nutriai:viewchange", () => setTimeout(() => this.renderCharts(), 80));
 
-    // 7. Cross-Tab Session Synchronization
+    // 7. Cross-Tab Session Synchronization (debounced — only fires from OTHER tabs)
+    // Note: storage events only fire from OTHER tabs, not the current tab.
+    // We add an extra guard so a login in progress doesn't trigger logout.
+    let _storageDebounce = null;
     window.addEventListener("storage", (e) => {
       if (e.key === "nutriai_active_user_v3" || e.key === "nutriai_jwt_token_v4") {
-        const hasSession = Boolean(localStorage.getItem("nutriai_active_user_v3") || localStorage.getItem("nutriai_jwt_token_v4"));
-        if (!hasSession && appState.data.isLoggedIn) {
-          appState.logout();
-          window.location.reload();
-        } else if (hasSession && !appState.data.isLoggedIn) {
-          window.location.reload();
-        }
+        clearTimeout(_storageDebounce);
+        _storageDebounce = setTimeout(() => {
+          const hasSession = Boolean(
+            localStorage.getItem("nutriai_active_user_v3") ||
+            localStorage.getItem("nutriai_jwt_token_v4")
+          );
+          // Only logout if user was logged in AND session was genuinely cleared by another tab
+          if (!hasSession && appState.data.isLoggedIn && !NutriAIApp._loginInProgress) {
+            appState.logout();
+            window.location.reload();
+          } else if (hasSession && !appState.data.isLoggedIn) {
+            window.location.reload();
+          }
+        }, 1500);
       }
     });
 
@@ -129,10 +139,12 @@ const NutriAIApp = {
     const demoLoginBtn = document.getElementById("demoLoginBtn");
     if (demoLoginBtn) {
       demoLoginBtn.addEventListener("click", () => {
+        NutriAIApp._loginInProgress = true;
         appState.setLoggedIn(true, NutriAIData.defaultProfile);
         this.closeAllModals();
-        this.showToast("Logged in successfully as Alex Morgan (Demo)", "success");
+        this.showToast("Logged in as Alex Morgan (Demo) ✓", "success");
         NutriAINav.navigateTo("dashboard");
+        setTimeout(() => { NutriAIApp._loginInProgress = false; }, 3000);
       });
     }
 
@@ -160,6 +172,7 @@ const NutriAIApp = {
           return;
         }
 
+        NutriAIApp._loginInProgress = true;
         try {
           if (submitBtn) {
             submitBtn.disabled = true;
@@ -169,27 +182,30 @@ const NutriAIApp = {
           const res = await NutriAIAuthService.signIn(email, password);
           this.closeAllModals();
           const name = res.profile?.name || email.split("@")[0];
-          this.showToast(`Welcome back, ${name}! Your profile is loaded. ✓`, "success");
+          this.showToast(`Welcome back, ${name}! ✓`, "success");
           NutriAINav.navigateTo("dashboard");
         } catch (err) {
           if (errEl) {
-            const isNoAccount = err.message && (err.message.includes("No account found") || err.message.includes("Sign up"));
+            const isNoAccount = err.message && (err.message.includes("No account found") || err.message.includes("Sign up") || err.message.includes("create your profile"));
             if (isNoAccount) {
               errEl.innerHTML = `
-                <div style="display:flex; flex-direction:column; gap:0.4rem; text-align:left;">
-                  <div>⚠️ ${err.message}</div>
-                  <div style="margin-top:0.25rem;">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="NutriAIApp.closeAllModals(); NutriAIApp.resetWizard?.(); NutriAIApp.openModal('modalWizard');" style="padding:0.35rem 0.75rem; font-size:0.8125rem;">✨ Create Account Now</button>
-                  </div>
+                <div style="text-align:left;">
+                  <div style="margin-bottom:0.5rem;">⚠️ ${err.message}</div>
+                  <button type="button" class="btn btn-primary btn-sm"
+                    onclick="NutriAIApp.closeAllModals(); NutriAIApp.resetWizard?.(); NutriAIApp.openModal('modalWizard');"
+                    style="padding:0.35rem 0.9rem; font-size:0.8125rem;">
+                    ✨ Create Account Now
+                  </button>
                 </div>
               `;
             } else {
-              errEl.textContent = err.message || "Failed to sign in. Please verify your credentials.";
+              errEl.textContent = err.message || "Sign in failed. Please check your email and password.";
             }
             errEl.style.display = "block";
           }
-          this.showToast(err.message || "Failed to sign in.", "error");
+          this.showToast(err.message || "Sign in failed.", "error");
         } finally {
+          NutriAIApp._loginInProgress = false;
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = "Sign In";
