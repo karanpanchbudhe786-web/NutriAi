@@ -1817,7 +1817,9 @@ const NutriAIApp = {
     if (bmiCat) { bmiCat.textContent = targets.bmiCategory; bmiCat.style.color = targets.bmiColor; }
     setTxt("profileBmrVal", `${targets.bmr} kcal`);
     setTxt("profileTdeeVal", `${targets.tdee} kcal`);
+    setTxt("profileTdeeSubtitle", targets.palLabel || "Physical Activity (PAL)");
     setTxt("profileTargetCals", `${targets.calories} kcal/day`);
+    setTxt("profileTargetCalsSubtitle", targets.deltaLabel || "Target Daily Budget");
     setTxt("profileProteinTarget", `${targets.protein}g`);
     setTxt("profileCarbsTarget", `${targets.carbs}g`);
     setTxt("profileFatsTarget", `${targets.fats}g`);
