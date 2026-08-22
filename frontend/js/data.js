@@ -1196,79 +1196,51 @@ const NutriAIData = {
 
   // Food Database for Instant Logging Search (expanded with Indian staples & fiber)
   foodDatabase: [
-    // --- Supplements ---
     { name: "Whey Protein Isolate (1 scoop, 30g)", cals: 120, p: 25, c: 2, f: 1, fiber: 0, category: "Supplements" },
-
-    // --- Dairy & Eggs ---
     { name: "Egg (Large, Whole, 1 pc)", cals: 72, p: 6, c: 0.4, f: 5, fiber: 0, category: "Dairy & Eggs" },
     { name: "Egg Whites (100g / ~3 eggs)", cals: 52, p: 11, c: 0.7, f: 0.2, fiber: 0, category: "Dairy & Eggs" },
     { name: "Paneer / Cottage Cheese (Fresh, 100g)", cals: 265, p: 18, c: 4, f: 20, fiber: 0, category: "Dairy & Eggs" },
-    { name: "Dahi / Curd Whole Milk (1 cup / 150g)", cals: 100, p: 5, c: 7, f: 5, fiber: 0, category: "Dairy & Eggs" },
-    { name: "Greek Yogurt 0% (1 cup / 200g)", cals: 130, p: 20, c: 7, f: 0, fiber: 0, category: "Dairy & Eggs" },
-    { name: "Cottage Cheese 2% (150g)", cals: 120, p: 18, c: 6, f: 3, fiber: 0, category: "Dairy & Eggs" },
-
-    // --- Legumes ---
     { name: "Moong Dal (Cooked, 1 cup / 200g)", cals: 212, p: 14, c: 38, f: 1, fiber: 8, category: "Legumes" },
     { name: "Chana Masala / Chickpea Curry (1 cup / 200g)", cals: 240, p: 12, c: 35, f: 6, fiber: 9, category: "Legumes" },
+    { name: "Roti / Chapati (Whole Wheat, 1 pc / 40g)", cals: 104, p: 3.5, c: 22, f: 0.5, fiber: 3, category: "Bakery" },
+    { name: "Steamed Idli (2 pcs / 80g)", cals: 130, p: 4, c: 28, f: 0.4, fiber: 2, category: "Grains & Starches" },
+    { name: "Sambar (Vegetable Lentil Soup, 1 cup / 200ml)", cals: 110, p: 5, c: 18, f: 2.5, fiber: 4, category: "Legumes" },
+    { name: "Roasted Makhana / Foxnuts (30g)", cals: 106, p: 3, c: 20, f: 0.3, fiber: 2, category: "Snacks" },
+    { name: "Sprouted Moong Salad (1 cup / 150g)", cals: 120, p: 8, c: 20, f: 1, fiber: 6, category: "Produce" },
+    { name: "Dahi / Curd Whole Milk (1 cup / 150g)", cals: 100, p: 5, c: 7, f: 5, fiber: 0, category: "Dairy & Eggs" },
+    { name: "Goan Fish Curry (1 cup / 200g)", cals: 220, p: 24, c: 6, f: 11, fiber: 1.5, category: "Seafood" },
+    { name: "Chicken Breast (Cooked, 150g)", cals: 247, p: 46, c: 0, f: 5.3, fiber: 0, category: "Poultry & Meat" },
+    { name: "Chicken Thigh Skinless (Cooked, 150g)", cals: 270, p: 38, c: 0, f: 12, fiber: 0, category: "Poultry & Meat" },
+    { name: "Wild Salmon (Cooked, 150g)", cals: 280, p: 35, c: 0, f: 14, fiber: 0, category: "Seafood" },
+    { name: "Shrimp (Cooked, 150g)", cals: 151, p: 29, c: 1, f: 2, fiber: 0, category: "Seafood" },
+    { name: "Canned Tuna in Water (150g)", cals: 130, p: 28, c: 0, f: 1, fiber: 0, category: "Seafood" },
+    { name: "Greek Yogurt 0% (1 cup / 200g)", cals: 130, p: 20, c: 7, f: 0, fiber: 0, category: "Dairy & Eggs" },
+    { name: "Cottage Cheese 2% (150g)", cals: 120, p: 18, c: 6, f: 3, fiber: 0, category: "Dairy & Eggs" },
+    { name: "Firm Tofu (150g)", cals: 130, p: 15, c: 3, f: 7, fiber: 0.6, category: "Plant Proteins" },
     { name: "Black Beans (Cooked, 1/2 cup / 86g)", cals: 114, p: 7.6, c: 20, f: 0.5, fiber: 7.5, category: "Legumes" },
     { name: "Chickpeas (Cooked, 1/2 cup / 82g)", cals: 134, p: 7.3, c: 22, f: 2.1, fiber: 6.2, category: "Legumes" },
     { name: "Lentils (Cooked, 1/2 cup / 99g)", cals: 115, p: 9, c: 20, f: 0.4, fiber: 7.8, category: "Legumes" },
-
-    // --- Indian Street Food & Traditional Dishes (ICMR-IFCT 2017) ---
-    { name: "Vada Pav (1 piece / ~120g)", cals: 280, p: 6.0, c: 42.0, f: 11.5, fiber: 2.5, category: "Indian Street Food" },
-    { name: "Samosa (1 piece / ~90g)", cals: 250, p: 4.5, c: 28.0, f: 14.0, fiber: 2.0, category: "Indian Street Food" },
-    { name: "Pav Bhaji (2 pav + 150g bhaji)", cals: 420, p: 8.5, c: 58.0, f: 18.0, fiber: 6.0, category: "Indian Street Food" },
-    { name: "Poha (1 bowl / ~150g)", cals: 220, p: 4.2, c: 38.0, f: 6.0, fiber: 3.2, category: "Indian Breakfast" },
-    { name: "Idli with Sambar & Chutney (2 idlis / ~200g)", cals: 180, p: 6.5, c: 34.0, f: 2.5, fiber: 3.5, category: "Indian Breakfast" },
-    { name: "Masala Dosa with Sambar (1 regular / ~250g)", cals: 330, p: 7.0, c: 48.0, f: 12.5, fiber: 4.0, category: "Indian Breakfast" },
-    { name: "Dal Tadka (1 bowl / ~150g)", cals: 155, p: 8.5, c: 20.0, f: 4.5, fiber: 4.5, category: "Indian Dal & Curry" },
-    { name: "Paneer Tikka / Bhurji (150g)", cals: 320, p: 18.5, c: 6.0, f: 24.0, fiber: 2.0, category: "Indian Dal & Curry" },
-    { name: "Chicken Biryani (1 plate / ~300g)", cals: 480, p: 26.0, c: 56.0, f: 16.0, fiber: 3.0, category: "Indian Rice & Biryani" },
-    { name: "Boiled Eggs (2 whole large / ~120g)", cals: 144, p: 12.6, c: 0.8, f: 10.0, fiber: 0.0, category: "Dairy & Eggs" },
-
-    // --- Grains & Starches ---
-    { name: "Roti / Chapati (Whole Wheat, 1 pc / 40g)", cals: 114, p: 3.2, c: 22.0, f: 0.8, fiber: 2.8, category: "Indian Bread & Grains" },
-    { name: "Steamed Idli (2 pcs / 80g)", cals: 130, p: 4, c: 28, f: 0.4, fiber: 2, category: "Indian Breakfast" },
-    { name: "Sambar (Vegetable Lentil Soup, 1 cup / 200ml)", cals: 110, p: 5, c: 18, f: 2.5, fiber: 4, category: "Indian Dal & Curry" },
     { name: "Brown Rice (Cooked, 1 cup / 195g)", cals: 218, p: 4.5, c: 45, f: 1.6, fiber: 3.5, category: "Grains & Starches" },
     { name: "Quinoa (Cooked, 1 cup / 185g)", cals: 222, p: 8.1, c: 39, f: 3.5, fiber: 5.2, category: "Grains & Starches" },
     { name: "Rolled Oats (Dry, 50g)", cals: 190, p: 6.5, c: 34, f: 3.5, fiber: 4.5, category: "Grains & Starches" },
     { name: "Sweet Potato (Baked, 1 medium / 130g)", cals: 112, p: 2, c: 26, f: 0.1, fiber: 3.8, category: "Grains & Starches" },
     { name: "Sourdough Bread (1 slice / 45g)", cals: 110, p: 4, c: 22, f: 0.8, fiber: 1, category: "Bakery" },
-
-    // --- Snacks ---
-    { name: "Roasted Makhana / Foxnuts (30g)", cals: 106, p: 3, c: 20, f: 0.3, fiber: 2, category: "Snacks" },
-
-    // --- Produce ---
-    { name: "Sprouted Moong Salad (1 cup / 150g)", cals: 120, p: 8, c: 20, f: 1, fiber: 6, category: "Produce" },
-
-    // --- Poultry & Seafood ---
-    { name: "Chicken Breast (Cooked, 150g)", cals: 247, p: 46, c: 0, f: 5.3, fiber: 0, category: "Poultry & Meat" },
-    { name: "Chicken Thigh Skinless (Cooked, 150g)", cals: 270, p: 38, c: 0, f: 12, fiber: 0, category: "Poultry & Meat" },
-    { name: "Goan Fish Curry (1 cup / 200g)", cals: 220, p: 24, c: 6, f: 11, fiber: 1.5, category: "Seafood" },
-    { name: "Wild Salmon (Cooked, 150g)", cals: 280, p: 35, c: 0, f: 14, fiber: 0, category: "Seafood" },
-    { name: "Shrimp (Cooked, 150g)", cals: 151, p: 29, c: 1, f: 2, fiber: 0, category: "Seafood" },
-    { name: "Canned Tuna in Water (150g)", cals: 130, p: 28, c: 0, f: 1, fiber: 0, category: "Seafood" },
-
-    // --- Plant Proteins ---
-    { name: "Firm Tofu (150g)", cals: 130, p: 15, c: 3, f: 7, fiber: 0.6, category: "Plant Proteins" },
-
-    // --- Fruits ---
+    { name: "Avocado (1/2 fruit / 100g)", cals: 160, p: 2, c: 8.5, f: 14.7, fiber: 6.7, category: "Healthy Fats & Produce" },
+    { name: "Almond Butter (1 tbsp / 16g)", cals: 98, p: 3.4, c: 3, f: 8.9, fiber: 0.5, category: "Nuts & Spreads" },
+    { name: "Peanut Butter Natural (1 tbsp / 16g)", cals: 95, p: 4, c: 3.5, f: 8, fiber: 0.5, category: "Nuts & Spreads" },
     { name: "Banana (Medium, 118g)", cals: 105, p: 1.3, c: 27, f: 0.3, fiber: 3.1, category: "Fruits" },
     { name: "Apple (Medium, 180g)", cals: 95, p: 0.5, c: 25, f: 0.3, fiber: 4.4, category: "Fruits" },
     { name: "Blueberries (1 cup / 148g)", cals: 84, p: 1.1, c: 21, f: 0.5, fiber: 3.6, category: "Fruits" },
-
-    // --- Vegetables ---
-    { name: "Broccoli (Steamed, 1 cup / 150g)", cals: 55, p: 3.7, c: 11, f: 0.6, fiber: 5.2, category: "Vegetables" },
-    { name: "Spinach (Raw, 2 cups / 60g)", cals: 14, p: 1.7, c: 2.2, f: 0.2, fiber: 1.5, category: "Vegetables" },
-
-    // --- Healthy Fats ---
-    { name: "Avocado (1/2 fruit / 100g)", cals: 160, p: 2, c: 8.5, f: 14.7, fiber: 6.7, category: "Healthy Fats & Produce" },
     { name: "Olive Oil Extra Virgin (1 tbsp / 14g)", cals: 119, p: 0, c: 0, f: 13.5, fiber: 0, category: "Oils" },
-
-    // --- Nuts & Spreads ---
+    { name: "Broccoli (Steamed, 1 cup / 150g)", cals: 55, p: 3.7, c: 11, f: 0.6, fiber: 5.2, category: "Vegetables" },
     { name: "Almond Butter (1 tbsp / 16g)", cals: 98, p: 3.4, c: 3, f: 8.9, fiber: 0.5, category: "Nuts & Spreads" },
     { name: "Peanut Butter Natural (1 tbsp / 16g)", cals: 95, p: 4, c: 3.5, f: 8, fiber: 0.5, category: "Nuts & Spreads" },
+    { name: "Banana (Medium, 118g)", cals: 105, p: 1.3, c: 27, f: 0.3, fiber: 3.1, category: "Fruits" },
+    { name: "Apple (Medium, 180g)", cals: 95, p: 0.5, c: 25, f: 0.3, fiber: 4.4, category: "Fruits" },
+    { name: "Blueberries (1 cup / 148g)", cals: 84, p: 1.1, c: 21, f: 0.5, fiber: 3.6, category: "Fruits" },
+    { name: "Olive Oil Extra Virgin (1 tbsp / 14g)", cals: 119, p: 0, c: 0, f: 13.5, fiber: 0, category: "Oils" },
+    { name: "Broccoli (Steamed, 1 cup / 150g)", cals: 55, p: 3.7, c: 11, f: 0.6, fiber: 5.2, category: "Vegetables" },
+    { name: "Spinach (Raw, 2 cups / 60g)", cals: 14, p: 1.7, c: 2.2, f: 0.2, fiber: 1.5, category: "Vegetables" },
     { name: "Mixed Nuts (30g)", cals: 173, p: 5, c: 6, f: 15, fiber: 1.8, category: "Nuts & Spreads" }
   ],
 
