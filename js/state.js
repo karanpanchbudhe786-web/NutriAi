@@ -298,8 +298,7 @@ class NutriAIState {
       water: Number(p.waterTarget) || 3200,
       fiber: 32
     };
-  }
-  }
+  },
 
   // --- Profile Completion Calculator ---
   getProfileCompletion() {
