@@ -334,21 +334,32 @@ class NutriAIState {
   }
 
   setLoggedIn(status, user = null) {
-    this.data.isLoggedIn = Boolean(status);
-    if (status) {
-      if (user) {
-        this.data.profile = { ...NutriAIData.defaultProfile, ...this.data.profile, ...user };
-      }
-      const email = this.data.profile?.email || "demo_user";
-      localStorage.setItem("nutriai_active_user_v3", email);
-      localStorage.setItem("nutriai_user_email", email);
-      this.recalculateTargets();
-    } else {
+    if (!status) {
       this.logout();
       return;
     }
+    // Build a complete profile — merge default → existing → provided user
+    const existingProfile = (this.data && this.data.profile) ? this.data.profile : {};
+    const baseProfile = (typeof NutriAIData !== "undefined" && NutriAIData.defaultProfile)
+      ? NutriAIData.defaultProfile : {};
+    const mergedProfile = { ...baseProfile, ...existingProfile, ...(user || {}) };
+
+    this.data.isLoggedIn = true;
+    this.data.profile = mergedProfile;
+
+    // Persist session keys
+    const email = mergedProfile.email || "demo_user";
+    try {
+      localStorage.setItem("nutriai_active_user_v3", email);
+      localStorage.setItem("nutriai_user_email", email);
+    } catch (e) {
+      console.warn("localStorage write failed:", e);
+    }
+
+    this.recalculateTargets();
     this.saveState();
   }
+
 
   logout() {
     try {
