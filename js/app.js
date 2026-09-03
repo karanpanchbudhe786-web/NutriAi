@@ -135,16 +135,27 @@ const NutriAIApp = {
       });
     }
 
-    // One-Click Demo Login
+    // One-Click Demo Login — Alex Morgan
     const demoLoginBtn = document.getElementById("demoLoginBtn");
     if (demoLoginBtn) {
       demoLoginBtn.addEventListener("click", () => {
         NutriAIApp._loginInProgress = true;
-        appState.setLoggedIn(true, NutriAIData.defaultProfile);
-        this.closeAllModals();
-        this.showToast("Logged in as Alex Morgan (Demo) ✓", "success");
-        NutriAINav.navigateTo("dashboard");
-        setTimeout(() => { NutriAIApp._loginInProgress = false; }, 3000);
+        try {
+          // Use a clean copy of the demo profile — don't mutate NutriAIData
+          const demoProfile = JSON.parse(JSON.stringify(NutriAIData.defaultProfile));
+          appState.setLoggedIn(true, demoProfile);
+          this.closeAllModals();
+          this.showToast("Logged in as Alex Morgan (Demo) ✓", "success");
+          // Defer navigation by one frame to ensure state is committed
+          requestAnimationFrame(() => {
+            NutriAINav.navigateTo("dashboard");
+            setTimeout(() => { NutriAIApp._loginInProgress = false; }, 2000);
+          });
+        } catch (e) {
+          NutriAIApp._loginInProgress = false;
+          console.error("Demo login error:", e);
+          this.showToast("Demo login error. Please refresh.", "error");
+        }
       });
     }
 
@@ -173,20 +184,22 @@ const NutriAIApp = {
         }
 
         NutriAIApp._loginInProgress = true;
-        try {
-          if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Signing In...";
-          }
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Signing In..."; }
 
+        try {
           const res = await NutriAIAuthService.signIn(email, password);
           this.closeAllModals();
           const name = res.profile?.name || email.split("@")[0];
           this.showToast(`Welcome back, ${name}! ✓`, "success");
-          NutriAINav.navigateTo("dashboard");
+          // Defer navigation so state is fully persisted before route guard
+          requestAnimationFrame(() => NutriAINav.navigateTo("dashboard"));
         } catch (err) {
           if (errEl) {
-            const isNoAccount = err.message && (err.message.includes("No account found") || err.message.includes("Sign up") || err.message.includes("create your profile"));
+            const isNoAccount = err.message && (
+              err.message.includes("No account found") ||
+              err.message.includes("Sign up") ||
+              err.message.includes("create your profile")
+            );
             if (isNoAccount) {
               errEl.innerHTML = `
                 <div style="text-align:left;">
@@ -206,10 +219,7 @@ const NutriAIApp = {
           this.showToast(err.message || "Sign in failed.", "error");
         } finally {
           NutriAIApp._loginInProgress = false;
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Sign In";
-          }
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Sign In"; }
         }
       });
     }
