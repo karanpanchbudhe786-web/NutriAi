@@ -61,28 +61,28 @@
   --primary-900: var(--green-900);
 
   /* ── Surfaces ── */
-  --bg-app:             #f8faf8;
+  --bg-app:             #f8faf9;
   --bg-surface:         #ffffff;
-  --bg-surface-subtle:  #f4f7f4;
+  --bg-surface-subtle:  #f3f6f4;
   --bg-surface-elevated:#ffffff;
-  --bg-sidebar:         #1b4332;   /* Deep forest sidebar */
-  --bg-sidebar-hover:   rgba(255,255,255,0.08);
-  --bg-sidebar-active:  rgba(255,255,255,0.14);
+  --bg-sidebar:         #ffffff;   /* Clean white sidebar matching reference */
+  --bg-sidebar-hover:   #f4fbf6;
+  --bg-sidebar-active:  #e8f7ee;   /* Soft mint active pill */
 
   /* ── Text ── */
-  --text-heading:   #0f2d1e;
-  --text-main:      #0f2d1e;
-  --text-body:      #2d4a3e;
-  --text-muted:     #5a7a6b;
-  --text-subtle:    #8eaa9b;
+  --text-heading:   #111827;
+  --text-main:      #1f2937;
+  --text-body:      #374151;
+  --text-muted:     #6b7280;
+  --text-subtle:    #9ca3af;
   --text-inverse:   #ffffff;
-  --text-sidebar:   rgba(255,255,255,0.82);
-  --text-sidebar-active: #ffffff;
+  --text-sidebar:   #4b5563;
+  --text-sidebar-active: #00875a;
 
   /* ── Borders ── */
-  --border-light:   #e8f0eb;
-  --border-default: #d4e4d8;
-  --border-focus:   var(--green-500);
+  --border-light:   #edf2ee;
+  --border-default: #d1ded5;
+  --border-focus:   #00875a;
 
   /* ── Macro Colors ── */
   --color-calories: #16a34a;
