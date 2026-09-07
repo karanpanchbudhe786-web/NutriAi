@@ -11,10 +11,10 @@
   <link rel="icon" type="image/png" href="assets/branding/nutriai-favicon.png" />
   <link rel="apple-touch-icon" href="assets/branding/nutriai-favicon.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="css/main.css?v=7.0" />
-  <link rel="stylesheet" href="css/components.css?v=7.0" />
-  <link rel="stylesheet" href="css/dashboard.css?v=7.0" />
-  <link rel="stylesheet" href="css/responsive.css?v=7.0" />
+  <link rel="stylesheet" href="css/main.css?v=8.0" />
+  <link rel="stylesheet" href="css/components.css?v=8.0" />
+  <link rel="stylesheet" href="css/dashboard.css?v=8.0" />
+  <link rel="stylesheet" href="css/responsive.css?v=8.0" />
 </head>
 <body>
 
@@ -24,13 +24,16 @@
   <!-- 2. App container with sidebar + main wrapper -->
   <div class="app-container">
     
-    <!-- SIDEBAR (id="sidebar") - DARK FOREST GREEN -->
+    <!-- SIDEBAR (id="sidebar") - CLEAN LIGHT THEME (Screenshot 1) -->
     <aside class="sidebar" id="sidebar">
       <!-- Header -->
       <div class="sidebar-header">
-        <a href="#dashboard" class="brand-logo" data-nav-target="dashboard">
+        <a href="#home" class="brand-logo" data-nav-target="home">
           <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI" class="brand-logo-mark">
-          <span class="brand-name">Nutri<span>AI</span></span>
+          <div class="brand-logo-text">
+            <span class="brand-name">Nutri<span>AI</span></span>
+            <span class="brand-tagline">Good Food. Brighter You</span>
+          </div>
         </a>
       </div>
 
@@ -41,7 +44,7 @@
         <div class="nav-group">
           <div class="nav-group-label">Explore</div>
           
-          <a href="#dashboard" class="nav-item active" data-nav-target="dashboard">
+          <a href="#home" class="nav-item active" data-nav-target="home">
             <span class="nav-item-icon">🏠</span>
             <span class="nav-item-label">Home</span>
           </a>
@@ -49,7 +52,6 @@
           <a href="#meals" class="nav-item" data-nav-target="meals">
             <span class="nav-item-icon">🍽️</span>
             <span class="nav-item-label">Meals Near You</span>
-            <span class="nav-badge new">New</span>
           </a>
           
           <a href="#nutrition" class="nav-item" data-nav-target="nutrition">
@@ -58,108 +60,76 @@
           </a>
           
           <a href="#mealplan" class="nav-item" data-nav-target="mealplan">
-            <span class="nav-item-icon">🥗</span>
-            <span class="nav-item-label">Meal Plan</span>
-            <span class="nav-badge new">7 Days</span>
+            <span class="nav-item-icon">🎁</span>
+            <span class="nav-item-label">Offers & Rewards</span>
           </a>
           
           <a href="#wellness" class="nav-item" data-nav-target="wellness">
-            <span class="nav-item-icon">⚡</span>
-            <span class="nav-item-label">Wellness & Progress</span>
+            <span class="nav-item-icon">👥</span>
+            <span class="nav-item-label">Community</span>
           </a>
         </div>
         
         <div class="nav-divider"></div>
         
-        <!-- AI & WELLNESS -->
-        <div class="nav-group">
-          <div class="nav-group-label">AI & Wellness</div>
-          
-          <a href="#ai-chat" class="nav-item" data-nav-target="ai-chat">
-            <span class="nav-item-icon">🤖</span>
-            <span class="nav-item-label">AI Nutritionist</span>
-            <span class="nav-badge new">Live AI</span>
-          </a>
-          
-          <a href="#ai-insights" class="nav-item" data-nav-target="ai-insights">
-            <span class="nav-item-icon">✨</span>
-            <span class="nav-item-label">AI Recommendations</span>
-          </a>
-          
-          <a href="#reports" class="nav-item" data-nav-target="reports">
-            <span class="nav-item-icon">📈</span>
-            <span class="nav-item-label">Insights & Reports</span>
-          </a>
-        </div>
-        
-        <div class="nav-divider"></div>
-        
-        <!-- HEALTH -->
-        <div class="nav-group">
-          <div class="nav-group-label">Health Previews</div>
-          
-          <a href="#profile" class="nav-item" data-nav-target="profile">
-            <span class="nav-item-icon">👤</span>
-            <span class="nav-item-label">Health Profile</span>
-          </a>
-          
-          <a href="#biomarkers" class="nav-item" data-nav-target="biomarkers">
-            <span class="nav-item-icon">🧪</span>
-            <span class="nav-item-label">Biomarkers & Labs</span>
-            <span class="nav-badge demo">Demo</span>
-          </a>
-          
-          <a href="#genetics" class="nav-item" data-nav-target="genetics">
-            <span class="nav-item-icon">🧬</span>
-            <span class="nav-item-label">Genetic Insights</span>
-            <span class="nav-badge demo">Demo</span>
-          </a>
-        </div>
-        
-        <div class="nav-divider"></div>
-        
-        <!-- FOR BUSINESS -->
+        <!-- FOR BUSINESS group -->
         <div class="nav-group">
           <div class="nav-group-label">For Business</div>
           
           <a href="#business" class="nav-item" data-nav-target="business">
             <span class="nav-item-icon">🏪</span>
             <span class="nav-item-label">Mess/Canteen Hub</span>
-            <span class="nav-badge new">New</span>
           </a>
           
-          <a href="#specialists" class="nav-item" data-nav-target="specialists">
-            <span class="nav-item-icon">👩‍⚕️</span>
-            <span class="nav-item-label">Specialist Network</span>
+          <a href="#mealplan" class="nav-item" data-nav-target="mealplan">
+            <span class="nav-item-icon">📝</span>
+            <span class="nav-item-label">Menu Planner</span>
+          </a>
+          
+          <a href="#reports" class="nav-item" data-nav-target="reports">
+            <span class="nav-item-icon">📈</span>
+            <span class="nav-item-label">Nutrition Insights</span>
           </a>
         </div>
         
         <div class="nav-divider"></div>
         
-        <!-- SUPPORT -->
+        <!-- SUPPORT group -->
         <div class="nav-group">
           <div class="nav-group-label">Support</div>
           
+          <a href="#ai-chat" class="nav-item" data-nav-target="ai-chat">
+            <span class="nav-item-icon">💬</span>
+            <span class="nav-item-label">Help & Feedback</span>
+          </a>
+          
           <a href="#settings" class="nav-item" data-nav-target="settings">
-            <span class="nav-item-icon">⚙️</span>
-            <span class="nav-item-label">Settings</span>
+            <span class="nav-item-icon">ℹ️</span>
+            <span class="nav-item-label">About NutriAI</span>
           </a>
         </div>
         
       </nav>
 
-      <!-- Sidebar user area -->
-      <div class="sidebar-user">
-        <div class="sidebar-user-profile">
-          <div class="sidebar-avatar" id="sidebarAvatar">A</div>
-          <div>
-            <div class="sidebar-user-name" id="sidebarUserName">Alex Morgan</div>
-            <div class="sidebar-user-goal" id="sidebarUserPlan">Goal: Balanced Nutrition</div>
-          </div>
+      <!-- Sidebar Footer (Screenshot 1 bottom card + User area) -->
+      <div class="sidebar-footer">
+        <div class="sidebar-promo-card">
+          <div class="sidebar-promo-icon">🌿</div>
+          <div class="sidebar-promo-text">Good Food<br>Better Humans<br>Together 💛</div>
         </div>
-        <div class="sidebar-user-actions">
-          <button type="button" class="sidebar-action-btn" id="loginBtnTrigger">⚙ Settings</button>
-          <button type="button" class="sidebar-action-btn" id="logoutBtn">↪ Sign Out</button>
+
+        <div class="sidebar-user" id="sidebarUserArea" style="display:none;">
+          <div class="sidebar-user-profile">
+            <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+            <div>
+              <div class="sidebar-user-name" id="sidebarUserName">Alex Morgan</div>
+              <div class="sidebar-user-goal" id="sidebarUserPlan">Goal: Balanced Nutrition</div>
+            </div>
+          </div>
+          <div class="sidebar-user-actions">
+            <button type="button" class="sidebar-action-btn" id="loginBtnTrigger">⚙ Settings</button>
+            <button type="button" class="sidebar-action-btn" id="logoutBtn">↪ Sign Out</button>
+          </div>
         </div>
       </div>
     </aside>
@@ -171,7 +141,7 @@
         <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle navigation">☰</button>
         
         <!-- Mobile brand -->
-        <a href="#dashboard" class="topbar-brand" data-nav-target="dashboard">
+        <a href="#home" class="topbar-brand" data-nav-target="home">
           <img src="assets/branding/nutriai-mark-transparent.png" alt="NutriAI" style="height:28px;">
           <span class="topbar-brand-name">NutriAI</span>
         </a>
@@ -179,17 +149,34 @@
         <!-- Page titles -->
         <div class="topbar-titles">
           <div class="topbar-title" id="topbarTitle">NutriAI Wellness Platform</div>
-          <div class="topbar-subtitle" id="topbarSubtitle">Good Food. Brighter You.</div>
+          <div class="topbar-subtitle" id="topbarSubtitle">Healthy Campuses. Healthier Generation.</div>
         </div>
         
         <!-- Actions -->
         <div class="topbar-actions">
-          <button type="button" class="topbar-icon-btn" id="notifBellBtn" title="Notifications">🔔</button>
-          <button type="button" class="topbar-action-pill primary" id="openAddFoodBtn">+ Log Meal</button>
-          <button type="button" class="topbar-action-pill secondary" data-water-add="250">💧 +250ml</button>
+          <button type="button" class="topbar-icon-btn" id="notifBellBtn" title="Notifications">
+            🔔<span class="notif-dot"></span>
+          </button>
+          <button type="button" class="btn-log-meal-topbar" id="openAddFoodBtn">
+            <span>+</span> <span>Log Meal</span>
+          </button>
+          <button type="button" class="btn-water-topbar" data-water-add="250">
+            <span>💧</span> <span>+250ml</span>
+          </button>
           
-          <!-- User area -->
-          <div class="topbar-user-area" id="topbarUserArea" style="position:relative;">
+          <!-- Back to Home Button (Shown on Login View) -->
+          <button type="button" class="btn-back-home" id="topbarBackHomeBtn" data-nav-target="home" style="display:none;">
+            <span>←</span> <span>Back to Home</span>
+          </button>
+
+          <!-- Guest actions (Sign In & Sign Up) -->
+          <div id="topbarGuestActions" style="display:flex; gap:0.5rem; align-items:center;">
+            <button type="button" class="btn-signin-topbar" id="topbarSignInBtn" data-nav-target="login">Sign In</button>
+            <button type="button" class="btn-signup-topbar" id="topbarSignUpBtn" onclick="NutriAIApp.openModal('modalAuthSignup')">Sign Up</button>
+          </div>
+
+          <!-- User area (when authenticated) -->
+          <div class="topbar-user-area" id="topbarUserArea" style="display:none; position:relative;">
             <button type="button" class="topbar-avatar-btn" id="topbarAvatarBtn" aria-expanded="false" aria-haspopup="true" title="Account menu">
               <span id="topbarUserInitial">A</span>
             </button>
@@ -210,127 +197,313 @@
               <div class="dropdown-divider"></div>
               <button type="button" class="dropdown-item danger" id="menuSignOutBtn" role="menuitem">↪ Sign Out</button>
             </div>
-            
-            <!-- Guest actions -->
-            <div id="topbarGuestActions" style="display:flex; gap:0.5rem; align-items:center;">
-              <button type="button" class="topbar-action-pill secondary" id="topbarSignInBtn" onclick="NutriAIApp.openModal('modalAuthLogin')">Sign In</button>
-              <button type="button" class="topbar-action-pill primary" id="topbarSignUpBtn" onclick="NutriAIApp.openModal('modalAuthSignup')">Get Started</button>
-            </div>
           </div>
         </div>
       </header>
       
       <main class="main-content">
         
-        <!-- VIEW: view-login (Public Homepage) -->
-        <section id="view-login" class="view-section">
-          <!-- Split Hero -->
-          <div class="home-hero">
-            <!-- Left editorial -->
-            <div class="home-hero-left">
-              <span class="home-hero-badge">🌿 Good Food. Brighter You.</span>
-              <div class="home-hero-heading">
-                <h1>Good Food<br><span class="accent">Hits Different.</span></h1>
+        <!-- =========================================================
+             VIEW: view-home (Public Home / Landing — Screenshot 1)
+             ========================================================= -->
+        <section id="view-home" class="view-section active">
+          
+          <!-- 1. Campus Hero Banner (Screenshot 1) -->
+          <div class="campus-hero-banner">
+            <div class="hero-left-col">
+              <div class="hero-genz-badge">🌿 For a Healthier, Happier Gen-Z</div>
+              <h1 class="hero-main-heading">Good Food<br><span class="hero-brush-underline">Hits Different</span></h1>
+              <p class="hero-sub-copy">NutriAI connects you with nutritious meals at your campus mess & canteens.</p>
+              
+              <div class="hero-cta-cards-row">
+                <a href="#login" class="hero-cta-card buddy" data-nav-target="login">
+                  <span class="hero-cta-icon">🧑‍🎓</span>
+                  <div class="hero-cta-texts">
+                    <div class="hero-cta-title">Buddy Login</div>
+                    <div class="hero-cta-subtitle">For Gen-Z Foodies</div>
+                  </div>
+                  <span class="hero-cta-arrow">→</span>
+                </a>
+                
+                <a href="#business" class="hero-cta-card business" data-nav-target="business">
+                  <span class="hero-cta-icon">🏪</span>
+                  <div class="hero-cta-texts">
+                    <div class="hero-cta-title">Business Login</div>
+                    <div class="hero-cta-subtitle">For Mess & Canteens</div>
+                  </div>
+                  <span class="hero-cta-arrow">→</span>
+                </a>
               </div>
-              <p class="home-hero-tagline">NutriAI connects you with nutritious meals at your campus mess & canteens. Track nutrition, discover healthy food nearby, and let AI guide your wellness journey.</p>
-              <div class="hero-benefits">
-                <div class="hero-benefit-item"><span class="hero-benefit-icon">🌿</span> Nutritious Choices for Every Day</div>
-                <div class="hero-benefit-item"><span class="hero-benefit-icon">⚡</span> Better Energy & Focus</div>
-                <div class="hero-benefit-item"><span class="hero-benefit-icon">❤️</span> Healthier, Happier Campus Life</div>
-                <div class="hero-benefit-item"><span class="hero-benefit-icon">👥</span> Join a Healthier Generation</div>
-              </div>
-              <!-- decorative food emojis -->
-              <span class="hero-food-emoji" style="top:12%;right:10%;">🥗</span>
-              <span class="hero-food-emoji" style="top:60%;right:6%;">🌾</span>
-              <span class="hero-food-emoji" style="bottom:18%;left:5%;">🥦</span>
             </div>
             
-            <!-- Right: Login card -->
-            <div class="home-hero-right">
-              <div class="login-card">
-                <div class="login-card-header">
-                  <img src="assets/branding/nutriai-logo.png" alt="NutriAI" class="login-logo" onerror="this.style.display='none'">
-                  <h2 class="login-card-title">Welcome Back! 👋</h2>
-                  <p class="login-card-sub">Log in to continue your NutriAI journey.</p>
-                </div>
-                
-                <!-- Login Type Tabs -->
-                <div class="tab-group" style="margin-bottom:1.25rem;">
-                  <button type="button" class="tab-btn active" id="buddyLoginTab">🍲 Buddy Login</button>
-                  <button type="button" class="tab-btn" id="businessLoginTab">🏪 Business Login</button>
-                </div>
-                
-                <!-- Error alert -->
-                <div class="login-error-alert" id="loginErrorAlert" role="alert"></div>
-                
-                <!-- Login Form -->
-                <form id="loginForm" novalidate autocomplete="on">
-                  <div class="form-group">
-                    <label class="form-label" for="loginEmail">Email Address</label>
-                    <input type="email" id="loginEmail" name="email" class="form-input" placeholder="your@email.com" autocomplete="email" required />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label" for="loginPassword">
-                      Password
-                      <a href="#" class="forgot-link">Forgot Password?</a>
-                    </label>
-                    <input type="password" id="loginPassword" name="password" class="form-input" placeholder="••••••••" autocomplete="current-password" required />
-                  </div>
-                  <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-full btn-lg" style="margin-top:0.25rem;">Log In →</button>
-                </form>
-                
-                <div class="login-divider">or try instantly</div>
-                
-                <!-- Demo Login -->
-                <button type="button" class="demo-login-btn" id="demoLoginBtn">
-                  <div class="demo-avatar">A</div>
-                  <div class="demo-login-info">
-                    <div class="demo-login-name">Alex Morgan — Demo Account</div>
-                    <div class="demo-login-label">⚡ Instant Demo Login — no signup needed</div>
-                  </div>
-                </button>
-                
-                <p class="login-footer-text">Don't have an account? <a href="#" onclick="NutriAIApp.openModal('modalAuthSignup'); return false;">Sign up free →</a></p>
+            <div class="hero-right-col">
+              <div class="hero-bowl-wrap">
+                <div class="hero-doodle-text">Fuel<br>Focus<br>Repeat</div>
+                <div class="hero-doodle-rays">／／／</div>
+                <img src="assets/food/bowl-hero.png" alt="Healthy Meal Bowl" class="hero-grain-bowl-img">
+              </div>
+              
+              <div class="hero-side-pills-col">
+                <div class="hero-vertical-pill"><span>🌿</span> <span>Nutritious Choices</span></div>
+                <div class="hero-vertical-pill"><span>⚡</span> <span>Better Energy</span></div>
+                <div class="hero-vertical-pill"><span>❤️</span> <span>Happier You</span></div>
+                <div class="hero-sticky-note"><span>Same Campus<br>New Vibe</span> <span>🙂</span></div>
               </div>
             </div>
           </div>
           
-          <!-- Feature Strip -->
-          <div class="feature-strip">
-            <div class="feature-strip-item">
-              <span class="feature-strip-icon">🥗</span>
+          <!-- 2. Feature Highlights Strip (Screenshot 1) -->
+          <div class="feature-highlight-strip">
+            <div class="strip-feature-item">
+              <div class="strip-feature-icon green">🌱</div>
               <div>
-                <div style="font-weight:700; color:var(--text-heading); font-size:0.875rem;">Real Nutrition</div>
-                <div class="feature-strip-text">Science-informed meals</div>
+                <div class="strip-feature-title">Real Nutrition</div>
+                <div class="strip-feature-desc">Science-backed meals</div>
               </div>
             </div>
-            <div class="feature-strip-item">
-              <span class="feature-strip-icon">🏫</span>
+            
+            <div class="strip-feature-item">
+              <div class="strip-feature-icon blue">👥</div>
               <div>
-                <div style="font-weight:700; color:var(--text-heading); font-size:0.875rem;">Campus Partners</div>
-                <div class="feature-strip-text">Mess & canteen discovery</div>
+                <div class="strip-feature-title">Campus Partners</div>
+                <div class="strip-feature-desc">Mess & canteens</div>
               </div>
             </div>
-            <div class="feature-strip-item">
-              <span class="feature-strip-icon">📊</span>
+            
+            <div class="strip-feature-item">
+              <div class="strip-feature-icon purple">🎯</div>
               <div>
-                <div style="font-weight:700; color:var(--text-heading); font-size:0.875rem;">Track Your Goals</div>
-                <div class="feature-strip-text">Stay on top effortlessly</div>
+                <div class="strip-feature-title">Track Your Goals</div>
+                <div class="strip-feature-desc">Stay on top, effortlessly</div>
               </div>
             </div>
-            <div class="feature-strip-item">
-              <span class="feature-strip-icon">🤖</span>
+            
+            <div class="strip-feature-item">
+              <div class="strip-feature-icon amber">⭐</div>
               <div>
-                <div style="font-weight:700; color:var(--text-heading); font-size:0.875rem;">AI Nutritionist</div>
-                <div class="feature-strip-text">Powered by Gemini AI</div>
+                <div class="strip-feature-title">Exclusive Perks</div>
+                <div class="strip-feature-desc">For Gen-Z community</div>
               </div>
             </div>
-            <div class="feature-strip-item">
-              <span class="feature-strip-icon">🎁</span>
-              <div>
-                <div style="font-weight:700; color:var(--text-heading); font-size:0.875rem;">Exclusive Perks</div>
-                <div class="feature-strip-text">Rewards for community</div>
+          </div>
+          
+          <!-- 3. Popular Near You Section (Screenshot 1) -->
+          <div class="popular-section">
+            <div class="popular-header-row">
+              <div class="popular-title-left">
+                <h2 class="popular-title-main">Popular Near You</h2>
+                <span class="popular-location-tag">📍 FC Road, Pune</span>
               </div>
+              <a href="#meals" class="popular-see-all" data-nav-target="meals">See All →</a>
+            </div>
+            
+            <div class="popular-cards-grid">
+              <!-- Card 1 -->
+              <div class="canteen-card">
+                <img src="assets/food/mess-the-study-mess.png" alt="The Study Mess" class="canteen-card-img">
+                <div class="canteen-card-body">
+                  <div class="canteen-name">The Study Mess</div>
+                  <div class="canteen-meta">
+                    <span class="canteen-rating">★ 4.8</span>
+                    <span>📍 0.8 km</span>
+                  </div>
+                  <div class="canteen-tags">
+                    <span class="canteen-tag green">High Protein</span>
+                    <span class="canteen-tag blue">Student Fav</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Card 2 -->
+              <div class="canteen-card">
+                <img src="assets/food/mess-campus-bites.png" alt="Campus Bites" class="canteen-card-img">
+                <div class="canteen-card-body">
+                  <div class="canteen-name">Campus Bites</div>
+                  <div class="canteen-meta">
+                    <span class="canteen-rating">★ 4.6</span>
+                    <span>📍 1.2 km</span>
+                  </div>
+                  <div class="canteen-tags">
+                    <span class="canteen-tag green">Nutritious</span>
+                    <span class="canteen-tag teal">Budget Friendly</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Card 3 -->
+              <div class="canteen-card">
+                <img src="assets/food/mess-green-bowl.png" alt="Green Bowl Canteen" class="canteen-card-img">
+                <div class="canteen-card-body">
+                  <div class="canteen-name">Green Bowl Canteen</div>
+                  <div class="canteen-meta">
+                    <span class="canteen-rating">★ 4.7</span>
+                    <span>📍 1.4 km</span>
+                  </div>
+                  <div class="canteen-tags">
+                    <span class="canteen-tag green">Healthy</span>
+                    <span class="canteen-tag coral">Tasty</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Card 4 -->
+              <div class="canteen-card">
+                <img src="assets/food/mess-sp-college.png" alt="SP College Mess" class="canteen-card-img">
+                <div class="canteen-card-body">
+                  <div class="canteen-name">SP College Mess</div>
+                  <div class="canteen-meta">
+                    <span class="canteen-rating">★ 4.5</span>
+                    <span>📍 2.1 km</span>
+                  </div>
+                  <div class="canteen-tags">
+                    <span class="canteen-tag amber">Traditional</span>
+                    <span class="canteen-tag yellow">Value for Money</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Card 5 (Promo Card) -->
+              <div class="canteen-promo-card">
+                <div>
+                  <div class="promo-card-title">Small Meals<br>Big Goals <span>👑</span></div>
+                  <p class="promo-card-desc">Track your nutrition, earn rewards and be a healthier you!</p>
+                </div>
+                <button type="button" class="promo-card-btn" data-nav-target="login">Start Tracking →</button>
+              </div>
+            </div>
+          </div>
+          
+        </section>
+
+        <!-- =========================================================
+             VIEW: view-login (Dedicated Split Login — Screenshot 2)
+             ========================================================= -->
+        <section id="view-login" class="view-section">
+          <div class="login-page-view">
+            <!-- Left Editorial Column (Screenshot 2) -->
+            <div class="login-editorial-left">
+              <span class="login-crown-doodle">👑</span>
+              <h1 class="login-editorial-heading">Good Food<br><span class="hero-brush-underline">Hits Different</span></h1>
+              <p class="login-editorial-sub">Real food. Real energy.<br>A healthier, happier Gen-Z.</p>
+              
+              <div class="login-value-list">
+                <div class="login-value-item">
+                  <div class="login-value-icon green">🌿</div>
+                  <div>
+                    <div class="login-value-title">Nutritious Meals</div>
+                    <div class="login-value-sub">Curated for your goals</div>
+                  </div>
+                </div>
+                
+                <div class="login-value-item">
+                  <div class="login-value-icon coral">❤️</div>
+                  <div>
+                    <div class="login-value-title">Better Focus</div>
+                    <div class="login-value-sub">More energy, less crash</div>
+                  </div>
+                </div>
+                
+                <div class="login-value-item">
+                  <div class="login-value-icon yellow">⚡</div>
+                  <div>
+                    <div class="login-value-title">Campus Friendly</div>
+                    <div class="login-value-sub">Mess & canteens around you</div>
+                  </div>
+                </div>
+                
+                <div class="login-value-item">
+                  <div class="login-value-icon purple">👥</div>
+                  <div>
+                    <div class="login-value-title">Be Part of a Healthier You</div>
+                    <div class="login-value-sub">Join a growing Gen-Z community</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="login-editorial-bottom">
+                <div class="hero-sticky-note" style="transform: rotate(-3deg);">
+                  <span>Same Campus<br>New Vibe</span> <span>🙂</span>
+                </div>
+                <img src="assets/food/bowl-login.png" alt="Nutritious Bowl" class="login-bottom-bowl-img">
+                <div class="login-doodle-repeat">Fuel<br>Focus<br>Repeat ♡</div>
+              </div>
+            </div>
+            
+            <!-- Right Login Card Panel (Screenshot 2) -->
+            <div class="login-card-panel">
+              <h2 class="login-panel-title">Welcome Back! 👋</h2>
+              <p class="login-panel-sub">Log in to continue your NutriAI journey.</p>
+              
+              <!-- Buddy vs Business Selector Tabs -->
+              <div class="login-mode-tabs">
+                <button type="button" class="login-mode-tab active" id="buddyLoginTab">
+                  <span class="login-mode-tab-icon">🧑‍🎓</span>
+                  <div>
+                    <div class="login-mode-tab-title">Buddy Login</div>
+                    <div class="login-mode-tab-sub">For Gen-Z Foodies</div>
+                  </div>
+                </button>
+                
+                <button type="button" class="login-mode-tab" id="businessLoginTab">
+                  <span class="login-mode-tab-icon">🏪</span>
+                  <div>
+                    <div class="login-mode-tab-title">Business Login</div>
+                    <div class="login-mode-tab-sub">For Mess & Canteens</div>
+                  </div>
+                </button>
+              </div>
+              
+              <!-- Inline Error Alert -->
+              <div class="login-error-alert" id="loginErrorAlert" role="alert"></div>
+              
+              <!-- Login Form -->
+              <form id="loginForm" novalidate autocomplete="on">
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label class="form-label" for="loginEmail">Email or Username</label>
+                  <div class="input-with-icon-wrap">
+                    <span class="input-icon-left">✉️</span>
+                    <input type="email" id="loginEmail" name="email" class="form-input-iconified" placeholder="yourname@college.edu" autocomplete="email" required />
+                  </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                    <label class="form-label" for="loginPassword" style="margin-bottom:0;">Password</label>
+                    <a href="#" class="forgot-link" style="font-size:0.75rem; color:#00875a; text-decoration:none; font-weight:600;">Forgot Password?</a>
+                  </div>
+                  <div class="input-with-icon-wrap">
+                    <span class="input-icon-left">🔒</span>
+                    <input type="password" id="loginPassword" name="password" class="form-input-iconified" placeholder="Enter your password" autocomplete="current-password" required />
+                    <span class="input-icon-right" id="togglePasswordBtn" title="Toggle password visibility">👁️</span>
+                  </div>
+                </div>
+                
+                <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-full btn-lg" style="background:#00875a; border-radius:12px; font-weight:700;">Log In →</button>
+              </form>
+              
+              <!-- Instant Demo Login for Testing -->
+              <button type="button" class="login-demo-btn-clean" id="demoLoginBtn">
+                <div class="demo-avatar" style="background:#00875a; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">A</div>
+                <div>
+                  <div style="font-weight:700; font-size:0.8125rem; color:#064e3b;">Alex Morgan — Demo Account</div>
+                  <div style="font-size:0.7rem; color:#047857;">⚡ Instant Demo Login — 1-click test</div>
+                </div>
+              </button>
+
+              <div class="login-divider">or continue with</div>
+              
+              <div class="social-login-row">
+                <button type="button" class="social-login-btn">
+                  <span style="font-weight:700; color:#ea4335;">G</span> <span>Continue with Google</span>
+                </button>
+                <button type="button" class="social-login-btn">
+                  <span></span> <span>Continue with Apple</span>
+                </button>
+              </div>
+              
+              <p class="login-footer-text" style="text-align:center; margin-top:1.25rem; font-size:0.8125rem; color:#6b7280;">
+                New here? <a href="#" onclick="NutriAIApp.openModal('modalAuthSignup'); return false;" style="color:#00875a; font-weight:700; text-decoration:none;">Sign Up</a>
+              </p>
             </div>
           </div>
         </section>
@@ -1495,17 +1668,17 @@
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- JavaScript Modules with Cache-Busting Version Query -->
-  <script src="js/data.js?v=7.0"></script>
-  <script src="js/apiClient.js?v=7.0"></script>
-  <script src="js/state.js?v=7.0"></script>
-  <script src="js/charts.js?v=7.0"></script>
-  <script src="js/navigation.js?v=7.0"></script>
-  <script src="js/mealFilter.js?v=7.0"></script>
-  <script src="js/aiService.js?v=7.0"></script>
-  <script src="js/authService.js?v=7.0"></script>
-  <script src="js/dbService.js?v=7.0"></script>
-  <script src="js/reportService.js?v=7.0"></script>
-  <script src="js/app.js?v=7.0"></script>
+  <script src="js/data.js?v=8.0"></script>
+  <script src="js/apiClient.js?v=8.0"></script>
+  <script src="js/state.js?v=8.0"></script>
+  <script src="js/charts.js?v=8.0"></script>
+  <script src="js/navigation.js?v=8.0"></script>
+  <script src="js/mealFilter.js?v=8.0"></script>
+  <script src="js/aiService.js?v=8.0"></script>
+  <script src="js/authService.js?v=8.0"></script>
+  <script src="js/dbService.js?v=8.0"></script>
+  <script src="js/reportService.js?v=8.0"></script>
+  <script src="js/app.js?v=8.0"></script>
 
 </body>
 </html>
