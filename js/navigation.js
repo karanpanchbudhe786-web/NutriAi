@@ -36,7 +36,7 @@ const NutriAINav = {
 
     if (toggleBtn && sidebar) {
       toggleBtn.addEventListener("click", () => {
-        sidebar.classList.toggle("mobile-open");
+        sidebar.classList.toggle("open");
         if (backdrop) backdrop.classList.toggle("active");
       });
     }
@@ -57,7 +57,7 @@ const NutriAINav = {
   closeMobileSidebar() {
     const sidebar = document.getElementById("sidebar");
     const backdrop = document.getElementById("sidebarBackdrop");
-    if (sidebar) sidebar.classList.remove("mobile-open");
+    if (sidebar) sidebar.classList.remove("open");
     if (backdrop) backdrop.classList.remove("active");
   },
 
@@ -66,7 +66,7 @@ const NutriAINav = {
     const protectedViews = [
       "dashboard", "profile", "mealplan", "nutrition", "wellness",
       "biomarkers", "genetics", "ai-insights", "ai-chat", "reports",
-      "specialists", "settings"
+      "specialists", "settings", "meals", "business"
     ];
 
     if (!isAuth) {
@@ -132,19 +132,21 @@ const NutriAINav = {
 
   updateTopbarTitle(viewId) {
     const titles = {
-      "login": { title: "NutriAI Wellness Platform", sub: "Clinical AI Nutrition & Precision Metabolic Engine", docTitle: "NutriAI — Clinical AI Nutrition Platform" },
-      "dashboard": { title: "Daily Dashboard", sub: "Welcome back, track your nutritional progress", docTitle: "NutriAI — Daily Dashboard" },
-      "profile": { title: "Health Profile & Biometrics", sub: "Metabolic rate, body composition, and goal targets", docTitle: "NutriAI — Health Profile & Biometrics" },
-      "mealplan": { title: "7-Day Meal Plan", sub: "Personalized nutrient-dense meals & smart grocery list", docTitle: "NutriAI — 7-Day Meal Plan" },
-      "nutrition": { title: "Nutrition & Food Tracker", sub: "Macronutrient breakdown, calorie budget, and food log", docTitle: "NutriAI — Nutrition Tracker" },
-      "wellness": { title: "Wellness & Habit Streaks", sub: "Hydration, sleep, weight milestones, and daily routines", docTitle: "NutriAI — Wellness & Habits" },
-      "biomarkers": { title: "Biomarkers & Laboratory Panels", sub: "Cardiometabolic, lipid, and micronutrient lab tracking [Preview]", docTitle: "NutriAI — Biomarkers" },
-      "genetics": { title: "Nutrigenomic Insights", sub: "Genetic metabolic traits and personalized dietary responses [Preview]", docTitle: "NutriAI — Genetics" },
-      "ai-insights": { title: "NutriAI Smart Recommendations", sub: "Evidence-grounded meal timing & macro optimization [Preview]", docTitle: "NutriAI — AI Recommendations" },
-      "ai-chat": { title: "AI Nutritionist Assistant", sub: "Interactive dietary intelligence grounded in your biometrics & food log", docTitle: "NutriAI — AI Nutritionist" },
-      "reports": { title: "Metabolic Health Reports", sub: "Weekly nutrient analytics and executive summaries", docTitle: "NutriAI — Health Reports" },
-      "specialists": { title: "Specialist & Dietitian Network", sub: "Connect with board-certified sports dietitians and coaches [Preview]", docTitle: "NutriAI — Specialist Network" },
-      "settings": { title: "Settings & Preferences", sub: "App preferences, measurement units, AI keys, and cloud sync", docTitle: "NutriAI — Settings" }
+      "login":      { title: "NutriAI Wellness Platform", sub: "Good Food. Brighter You.", docTitle: "NutriAI — Good Food. Brighter You." },
+      "dashboard":  { title: "My Dashboard", sub: "Your daily wellness snapshot", docTitle: "NutriAI — Dashboard" },
+      "profile":    { title: "Health Profile", sub: "Your biometrics, goals & targets", docTitle: "NutriAI — Health Profile" },
+      "mealplan":   { title: "7-Day Meal Plan", sub: "Personalized meals for your goals", docTitle: "NutriAI — Meal Plan" },
+      "nutrition":  { title: "Nutrition Tracker", sub: "Macronutrients, calories & food log", docTitle: "NutriAI — Nutrition" },
+      "wellness":   { title: "Wellness & Progress", sub: "Hydration, weight & streaks", docTitle: "NutriAI — Wellness" },
+      "biomarkers": { title: "Biomarkers & Labs", sub: "Lab tracking preview [Demo]", docTitle: "NutriAI — Biomarkers" },
+      "genetics":   { title: "Genetic Insights", sub: "Nutrigenomic preview [Demo]", docTitle: "NutriAI — Genetics" },
+      "ai-insights":{ title: "AI Recommendations", sub: "Smart meal & macro insights", docTitle: "NutriAI — AI Insights" },
+      "ai-chat":    { title: "AI Nutritionist", sub: "Powered by Google Gemini", docTitle: "NutriAI — AI Nutritionist" },
+      "reports":    { title: "Insights & Reports", sub: "Weekly nutrition analytics", docTitle: "NutriAI — Reports" },
+      "specialists":{ title: "Specialist Network", sub: "Dietitians & wellness coaches", docTitle: "NutriAI — Specialists" },
+      "settings":   { title: "Settings", sub: "Account, AI & preferences", docTitle: "NutriAI — Settings" },
+      "meals":      { title: "Meals Near You", sub: "Campus mess & canteen discovery", docTitle: "NutriAI — Meals Near You" },
+      "business":   { title: "For Business", sub: "Mess & canteen partner hub", docTitle: "NutriAI — Business" }
     };
 
     const info = titles[viewId] || titles["login"];
