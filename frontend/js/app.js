@@ -89,10 +89,10 @@ const NutriAIApp = {
       });
     });
 
-    // Trigger Login Modal
+    // Sidebar settings button (⚙ Settings)
     const loginTrigger = document.getElementById("loginBtnTrigger");
     if (loginTrigger) {
-      loginTrigger.addEventListener("click", () => this.openModal("modalAuthLogin"));
+      loginTrigger.addEventListener("click", () => NutriAINav.navigateTo("settings"));
     }
 
     // Trigger Sign In Modal from topbar when unauthenticated
@@ -101,12 +101,34 @@ const NutriAIApp = {
       topbarSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
     }
 
+    // Dashboard Log Meal button (new design)
+    const dashLogMealBtn = document.getElementById("dashLogMealBtn");
+    if (dashLogMealBtn) {
+      dashLogMealBtn.addEventListener("click", () => this.openModal("modalAddFood"));
+    }
+
+    // Business/Buddy login tab switching (new homepage design)
+    const buddyTab = document.getElementById("buddyLoginTab");
+    const businessTab = document.getElementById("businessLoginTab");
+    if (buddyTab && businessTab) {
+      buddyTab.addEventListener("click", () => {
+        buddyTab.classList.add("active");
+        businessTab.classList.remove("active");
+      });
+      businessTab.addEventListener("click", () => {
+        businessTab.classList.add("active");
+        buddyTab.classList.remove("active");
+        // Show a toast that business login is coming soon
+        this.showToast("Business login coming soon! Use Buddy login for now.", "info");
+      });
+    }
+
     // Guest Hero Action Buttons
     const guestStartWizardBtn = document.getElementById("guestStartWizardBtn");
     if (guestStartWizardBtn) {
       guestStartWizardBtn.addEventListener("click", () => {
         this.resetWizard?.();
-        this.openModal("modalWizard");
+        this.openModal("modalAuthSignup");
       });
     }
 
@@ -114,6 +136,7 @@ const NutriAIApp = {
     if (guestSignInBtn) {
       guestSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
     }
+
 
     // Switch between Login and Signup Modals
     const switchToSignup = document.getElementById("switchToSignup");
@@ -1494,33 +1517,141 @@ const NutriAIApp = {
     // 1. Render User Badge & Topbar
     this.renderUserBadge(state);
 
-    // 2. Render Dashboard Overview
+    // 2. Render Dashboard greeting
+    this.renderDashboardGreeting(state);
+
+    // 3. Render Dashboard Overview
     this.renderDashboardOverview(state, totals, targets);
 
-    // 3. Render Today's Meal Timeline on Dashboard
+    // 4. Render Today's Meal Timeline on Dashboard
     this.renderTodayMealTimeline(state);
 
-    // 4. Render Health Profile Tab
+    // 5. Render Health Profile Tab
     this.renderHealthProfile(state, targets);
 
-    // 5. Render 7-Day Meal Planner Tab
+    // 6. Render 7-Day Meal Planner Tab
     this.renderMealPlanner(state);
 
-    // 6. Render Nutrition & Food Tracker Tab
+    // 7. Render Nutrition & Food Tracker Tab
     this.renderNutritionTracker(state, totals, targets);
 
-    // 7. Render Wellness Tab
+    // 8. Render Wellness Tab
     this.renderWellness(state, targets);
 
-    // 8. Render Placeholder Sections
+    // 9. Render Placeholder Sections
     this.renderPlaceholders();
 
-    // 9. Render Settings
+    // 10. Render Settings
     this.renderSettings();
 
-    // 10. Render Canvas Charts
+    // 11. Render Canvas Charts
     this.renderCharts();
+
+    // 12. Render new stat card dashboard (new IDs)
+    this.renderNewStatCards(state, totals, targets);
+
+    // 13. Render health snapshot (aside card)
+    this.renderHealthSnapshot(state, targets);
   },
+
+  /** Time-of-day greeting helper */
+  _getGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  },
+
+  renderDashboardGreeting(state) {
+    const greetEl = document.getElementById("dashGreetingName");
+    const todayEl = document.getElementById("dashToday");
+    const streakEl = document.getElementById("dashStreak");
+
+    if (greetEl) {
+      const isLoggedIn = Boolean(state.data && state.data.isLoggedIn && state.data.profile);
+      const name = isLoggedIn ? (state.data.profile.name || "there").split(" ")[0] : "there";
+      greetEl.textContent = name;
+    }
+
+    if (todayEl) {
+      todayEl.textContent = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
+    }
+
+    if (streakEl) {
+      const streak = (state.data && state.data.dailyStreak) || 0;
+      streakEl.textContent = streak;
+    }
+  },
+
+  renderNewStatCards(state, totals, targets) {
+    // These are the new-design stat card IDs (camelCase without "stat" prefix)
+    if (!totals || !targets) return;
+    const waterLogged = (state.data && state.data.waterLogged) || 0;
+    const waterTarget = targets.water || 3200;
+
+    const setNew = (consumed, targetVal, consumedId, targetId, barId, remainId, pctId) => {
+      const cEl = document.getElementById(consumedId);
+      const tEl = document.getElementById(targetId);
+      const bEl = document.getElementById(barId);
+      const rEl = document.getElementById(remainId);
+      const pEl = document.getElementById(pctId);
+      const pct = targetVal > 0 ? Math.min(100, Math.round((consumed / targetVal) * 100)) : 0;
+      const remaining = Math.max(0, targetVal - consumed);
+      if (cEl) cEl.textContent = consumed;
+      if (tEl) tEl.textContent = targetVal.toLocaleString();
+      if (bEl) bEl.style.width = `${pct}%`;
+      if (rEl) rEl.textContent = remaining.toLocaleString();
+      if (pEl) pEl.textContent = `${pct}%`;
+    };
+
+    setNew(totals.calories || 0, targets.calories || 2000, "caloriesConsumed", "caloriesTarget", "caloriesBar", "caloriesRemaining", "caloriesPct");
+    setNew(totals.protein || 0, targets.protein || 100, "proteinConsumed", "proteinTarget", "proteinBar", "proteinRemaining", "proteinPct");
+    setNew(totals.carbs || 0, targets.carbs || 250, "carbsConsumed", "carbsTarget", "carbsBar", "carbsRemaining", "carbsPct");
+    setNew(totals.fats || 0, targets.fats || 65, "fatsConsumed", "fatsTarget", "fatsBar", "fatsRemaining", "fatsPct");
+
+    // Water (in ml)
+    const wCEl = document.getElementById("waterConsumed");
+    const wTEl = document.getElementById("waterTarget");
+    const wBEl = document.getElementById("waterBar");
+    const wREl = document.getElementById("waterRemaining");
+    const wPEl = document.getElementById("waterPct");
+    const waterPct = waterTarget > 0 ? Math.min(100, Math.round((waterLogged / waterTarget) * 100)) : 0;
+    if (wCEl) wCEl.textContent = waterLogged;
+    if (wTEl) wTEl.textContent = waterTarget.toLocaleString();
+    if (wBEl) wBEl.style.width = `${waterPct}%`;
+    if (wREl) wREl.textContent = Math.max(0, waterTarget - waterLogged).toLocaleString();
+    if (wPEl) wPEl.textContent = `${waterPct}%`;
+  },
+
+  renderHealthSnapshot(state, targets) {
+    const bmiEl      = document.getElementById("snapshotBmi");
+    const goalEl     = document.getElementById("snapshotGoal");
+    const dietEl     = document.getElementById("snapshotDiet");
+    const actEl      = document.getElementById("snapshotActivity");
+    const targetEl   = document.getElementById("snapshotTarget");
+
+    if (!state.data.isLoggedIn || !state.data.profile || !targets) {
+      if (bmiEl) bmiEl.textContent = "— (sign in)";
+      return;
+    }
+
+    const p = state.data.profile;
+
+    if (bmiEl) bmiEl.textContent = targets.bmi ? `${targets.bmi} · ${targets.bmiCategory}` : "—";
+
+    const goalLabels = { balanced_nutrition:"Balanced Nutrition", general_fitness:"General Fitness", muscle_strength:"Muscle & Strength", weight_management:"Weight Management", healthy_lifestyle:"Healthy Lifestyle", fat_loss:"Fat Loss", maintenance:"Maintenance", muscle_gain:"Muscle Gain", recomposition:"Body Recomp" };
+    if (goalEl) goalEl.textContent = goalLabels[p.goal] || "Balanced Nutrition";
+
+    const dietLabels = { balanced:"Non-Vegetarian", vegetarian:"Vegetarian", eggetarian:"Eggetarian", vegan:"Vegan", keto:"Ketogenic", pescatarian:"Pescatarian" };
+    if (dietEl) dietEl.textContent = dietLabels[p.dietPreference] || "Balanced";
+
+    const actLabels = { sedentary:"Sedentary", lightly_active:"Lightly Active", moderately_active:"Moderately Active", very_active:"Very Active", extra_active:"Extra Active" };
+    if (actEl) actEl.textContent = actLabels[p.activityLevel] || "—";
+
+    if (targetEl) targetEl.textContent = targets.calories ? `${targets.calories} kcal/day` : "—";
+  },
+
+
 
   renderUserBadge(state) {
     const isLoggedIn = Boolean(state.data && state.data.isLoggedIn && state.data.profile);
@@ -1792,7 +1923,7 @@ const NutriAIApp = {
   },
 
   renderTodayMealTimeline(state) {
-    const listEl = document.getElementById("todayMealsScheduleList");
+    const listEl = document.getElementById("todayMealsScheduleList") || document.getElementById("dashMealTimeline");
     if (!listEl) return;
 
     if (!state.data.isLoggedIn || !state.data.profile || !state.targets) {
