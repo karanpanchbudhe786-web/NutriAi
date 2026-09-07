@@ -95,10 +95,30 @@ const NutriAIApp = {
       loginTrigger.addEventListener("click", () => NutriAINav.navigateTo("settings"));
     }
 
-    // Trigger Sign In Modal from topbar when unauthenticated
+    // Trigger Sign In navigation from topbar when unauthenticated
     const topbarSignInBtn = document.getElementById("topbarSignInBtn");
     if (topbarSignInBtn) {
-      topbarSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
+      topbarSignInBtn.addEventListener("click", () => NutriAINav.navigateTo("login"));
+    }
+
+    // Topbar Back to Home button
+    const backHomeBtn = document.getElementById("topbarBackHomeBtn");
+    if (backHomeBtn) {
+      backHomeBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        NutriAINav.navigateTo("home");
+      });
+    }
+
+    // Toggle password visibility
+    const togglePass = document.getElementById("togglePasswordBtn");
+    const passInput = document.getElementById("loginPassword");
+    if (togglePass && passInput) {
+      togglePass.addEventListener("click", () => {
+        const isPass = passInput.type === "password";
+        passInput.type = isPass ? "text" : "password";
+        togglePass.textContent = isPass ? "🙈" : "👁️";
+      });
     }
 
     // Dashboard Log Meal button (new design)
@@ -1721,6 +1741,11 @@ const NutriAIApp = {
     if (userNameEl) userNameEl.textContent = displayName;
     if (userPlanEl) userPlanEl.textContent = isLoggedIn ? ("Goal: " + goalName) : "Sign in to personalize";
     if (logoutBtn) logoutBtn.style.display = isLoggedIn ? "block" : "none";
+
+    const sidebarUserArea = document.getElementById("sidebarUserArea");
+    if (sidebarUserArea) sidebarUserArea.style.display = isLoggedIn ? "block" : "none";
+    const topbarUserArea = document.getElementById("topbarUserArea");
+    if (topbarUserArea) topbarUserArea.style.display = isLoggedIn ? "block" : "none";
   },
 
   renderDashboardOverview(state, totals, targets) {
