@@ -7,6 +7,10 @@
    TABLET — ≤ 1280px
 ───────────────────────────────────────────── */
 @media (max-width: 1280px) {
+  .popular-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .stat-cards-grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -30,6 +34,24 @@
 @media (max-width: 1024px) {
   :root {
     --sidebar-width: 220px;
+  }
+
+  .campus-hero-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-right-col {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .feature-highlight-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .login-page-view {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .home-hero {
@@ -156,6 +178,10 @@
 
   /* Meal timeline */
   .meal-timeline { grid-template-columns: 1fr; }
+
+  .popular-cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .feature-highlight-strip { grid-template-columns: 1fr; gap: 0.875rem; padding: 1rem; }
+  .campus-hero-banner { padding: 1.5rem 1.25rem; }
 
   /* Feature strip */
   .feature-strip {
