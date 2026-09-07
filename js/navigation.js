@@ -4,16 +4,16 @@
  */
 
 const NutriAINav = {
-  activeView: "dashboard",
+  activeView: "home",
 
   init() {
     this.bindEvents();
     // Handle initial URL hash
     const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
     const initialRaw = window.location.hash.replace("#", "").replace("/", "").trim();
-    let initialHash = initialRaw || (isAuth ? "dashboard" : "login");
-    if (!isAuth && initialHash !== "login") {
-      initialHash = "login";
+    let initialHash = initialRaw || (isAuth ? "dashboard" : "home");
+    if (!isAuth && initialHash !== "login" && initialHash !== "home") {
+      initialHash = "home";
     }
     this.navigateTo(initialHash, false);
   },
@@ -50,7 +50,7 @@ const NutriAINav = {
     // Window hashchange
     window.addEventListener("hashchange", () => {
       const hash = window.location.hash.replace("#", "").replace("/", "").trim();
-      this.navigateTo(hash || "dashboard", false);
+      this.navigateTo(hash || "home", false);
     });
   },
 
@@ -70,11 +70,11 @@ const NutriAINav = {
     ];
 
     if (!isAuth) {
-      // Unauthenticated users are redirected to login/landing view
-      if (protectedViews.includes(viewId) || viewId === "dashboard" || !viewId) {
-        viewId = "login";
+      // Unauthenticated users can view home and login
+      if (protectedViews.includes(viewId) || !viewId) {
+        viewId = "home";
         if (updateHash) {
-          history.replaceState(null, "", "#login");
+          history.replaceState(null, "", "#home");
         }
       }
     } else {
@@ -89,7 +89,7 @@ const NutriAINav = {
 
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) {
-      viewId = isAuth ? "dashboard" : "login";
+      viewId = isAuth ? "dashboard" : "home";
       if (updateHash) {
         history.replaceState(null, "", `#${viewId}`);
       }
@@ -107,12 +107,25 @@ const NutriAINav = {
     // Update sidebar nav item active state
     document.querySelectorAll(".nav-item").forEach(item => {
       const target = item.getAttribute("data-nav-target");
-      if (target === viewId) {
+      if (target === viewId || (viewId === "dashboard" && target === "home")) {
         item.classList.add("active");
       } else {
         item.classList.remove("active");
       }
     });
+
+    // Toggle Back to Home button vs Guest Actions on Topbar
+    const backBtn = document.getElementById("topbarBackHomeBtn");
+    const guestBtns = document.getElementById("topbarGuestActions");
+    if (backBtn) {
+      if (viewId === "login") {
+        backBtn.style.display = "inline-flex";
+        if (guestBtns) guestBtns.style.display = "none";
+      } else {
+        backBtn.style.display = "none";
+        if (guestBtns && !isAuth) guestBtns.style.display = "flex";
+      }
+    }
 
     // Update topbar header text
     this.updateTopbarTitle(viewId);
@@ -132,8 +145,9 @@ const NutriAINav = {
 
   updateTopbarTitle(viewId) {
     const titles = {
-      "login":      { title: "NutriAI Wellness Platform", sub: "Good Food. Brighter You.", docTitle: "NutriAI — Good Food. Brighter You." },
-      "dashboard":  { title: "My Dashboard", sub: "Your daily wellness snapshot", docTitle: "NutriAI — Dashboard" },
+      "home":       { title: "NutriAI Wellness Platform", sub: "Healthy Campuses. Healthier Generation.", docTitle: "NutriAI — Good Food. Brighter You." },
+      "login":      { title: "NutriAI Wellness Platform", sub: "Healthy Campuses. Healthier Generation.", docTitle: "NutriAI — Sign In" },
+      "dashboard":  { title: "NutriAI Wellness Platform", sub: "Healthy Campuses. Healthier Generation.", docTitle: "NutriAI — Dashboard" },
       "profile":    { title: "Health Profile", sub: "Your biometrics, goals & targets", docTitle: "NutriAI — Health Profile" },
       "mealplan":   { title: "7-Day Meal Plan", sub: "Personalized meals for your goals", docTitle: "NutriAI — Meal Plan" },
       "nutrition":  { title: "Nutrition Tracker", sub: "Macronutrients, calories & food log", docTitle: "NutriAI — Nutrition" },
@@ -149,7 +163,7 @@ const NutriAINav = {
       "business":   { title: "For Business", sub: "Mess & canteen partner hub", docTitle: "NutriAI — Business" }
     };
 
-    const info = titles[viewId] || titles["login"];
+    const info = titles[viewId] || titles["home"];
     const titleEl = document.getElementById("topbarTitle");
     const subEl = document.getElementById("topbarSubtitle");
 
