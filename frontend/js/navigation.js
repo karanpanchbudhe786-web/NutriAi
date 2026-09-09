@@ -63,6 +63,7 @@ const NutriAINav = {
 
   navigateTo(viewId, updateHash = true) {
     const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
+    const userRole = (typeof appState !== "undefined" && appState.data && appState.data.role) || "buddy";
     const protectedViews = [
       "dashboard", "profile", "mealplan", "nutrition", "wellness",
       "biomarkers", "genetics", "ai-insights", "ai-chat", "reports",
@@ -78,24 +79,49 @@ const NutriAINav = {
         }
       }
     } else {
-      // Authenticated users requesting login are redirected to dashboard
+      // Authenticated users requesting login are redirected
       if (viewId === "login" || !viewId) {
-        viewId = "dashboard";
+        viewId = userRole === "business" ? "business" : "dashboard";
         if (updateHash) {
-          history.replaceState(null, "", "#dashboard");
+          history.replaceState(null, "", `#${viewId}`);
+        }
+      }
+
+      // STRICT ROLE-BASED ACCESS CONTROL (RBAC) ENFORCEMENT:
+      if (userRole === "buddy") {
+        // IF Buddy: Direct access to business route is blocked -> redirect to dashboard
+        if (viewId === "business") {
+          viewId = "dashboard";
+          if (updateHash) history.replaceState(null, "", "#dashboard");
+          if (typeof NutriAIApp !== "undefined" && NutriAIApp.showToast) {
+            NutriAIApp.showToast("Canteen Partner views are restricted to Business accounts.", "info");
+          }
+        }
+      } else if (userRole === "business") {
+        // IF Business: Consumer explore views are locked -> redirect to business
+        const consumerViews = ["meals", "nutrition", "wellness", "dashboard"];
+        if (consumerViews.includes(viewId)) {
+          viewId = "business";
+          if (updateHash) history.replaceState(null, "", "#business");
+          if (typeof NutriAIApp !== "undefined" && NutriAIApp.showToast) {
+            NutriAIApp.showToast("Consumer explore views are locked in Business Partner mode.", "info");
+          }
         }
       }
     }
 
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) {
-      viewId = isAuth ? "dashboard" : "home";
+      viewId = isAuth ? (userRole === "business" ? "business" : "dashboard") : "home";
       if (updateHash) {
         history.replaceState(null, "", `#${viewId}`);
       }
     }
 
     this.activeView = viewId;
+
+    // Enforce dynamic sidebar and hero RBAC visibility
+    this.updateRbacUi();
 
     // Update active view class
     document.querySelectorAll(".view-section").forEach(sec => {
@@ -141,6 +167,42 @@ const NutriAINav = {
     // Scroll main content to top
     const mainContent = document.querySelector(".main-content") || document.body;
     mainContent.scrollTo({ top: 0, behavior: "smooth" });
+  },
+
+  updateRbacUi() {
+    const isAuth = typeof appState !== "undefined" && Boolean(appState.data && appState.data.isLoggedIn && appState.data.profile);
+    const userRole = (typeof appState !== "undefined" && appState.data && appState.data.role) || "buddy";
+
+    const navExplore = document.getElementById("navGroupExplore");
+    const navBusiness = document.getElementById("navGroupBusiness");
+    const navDivider = document.getElementById("navDividerBusiness");
+    const heroBuddy = document.getElementById("heroBuddyCtaCard");
+    const heroBiz = document.getElementById("heroBusinessCtaCard");
+
+    if (!isAuth) {
+      if (navExplore) navExplore.style.display = "block";
+      if (navBusiness) navBusiness.style.display = "block";
+      if (navDivider) navDivider.style.display = "block";
+      if (heroBuddy) heroBuddy.style.display = "flex";
+      if (heroBiz) heroBiz.style.display = "flex";
+      return;
+    }
+
+    if (userRole === "buddy") {
+      // 1. Buddy: FOR BUSINESS section in sidebar is completely HIDDEN
+      if (navBusiness) navBusiness.style.display = "none";
+      if (navDivider) navDivider.style.display = "none";
+      if (navExplore) navExplore.style.display = "block";
+      if (heroBiz) heroBiz.style.display = "none";
+      if (heroBuddy) heroBuddy.style.display = "flex";
+    } else if (userRole === "business") {
+      // 2. Business Partner: Consumer EXPLORE section is completely HIDDEN
+      if (navExplore) navExplore.style.display = "none";
+      if (navBusiness) navBusiness.style.display = "block";
+      if (navDivider) navDivider.style.display = "none";
+      if (heroBuddy) heroBuddy.style.display = "none";
+      if (heroBiz) heroBiz.style.display = "flex";
+    }
   },
 
   updateTopbarTitle(viewId) {
