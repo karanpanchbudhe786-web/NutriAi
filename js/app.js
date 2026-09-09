@@ -127,19 +127,52 @@ const NutriAIApp = {
       dashLogMealBtn.addEventListener("click", () => this.openModal("modalAddFood"));
     }
 
-    // Business/Buddy login tab switching (new homepage design)
+    // Business/Buddy login tab switching (Strict RBAC Landing)
     const buddyTab = document.getElementById("buddyLoginTab");
     const businessTab = document.getElementById("businessLoginTab");
+    const demoLoginBtn = document.getElementById("demoLoginBtn");
+    const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+
     if (buddyTab && businessTab) {
       buddyTab.addEventListener("click", () => {
         buddyTab.classList.add("active");
         businessTab.classList.remove("active");
+        if (demoLoginBtn) {
+          demoLoginBtn.innerHTML = `
+            <div class="demo-avatar" style="background:#00875a; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">A</div>
+            <div>
+              <div style="font-weight:700; font-size:0.8125rem; color:#064e3b;">Alex Morgan — Demo Student</div>
+              <div style="font-size:0.7rem; color:#047857;">⚡ Instant Buddy Login — 1-click test</div>
+            </div>`;
+        }
+        if (loginSubmitBtn) loginSubmitBtn.textContent = "Log In as Buddy →";
       });
+
       businessTab.addEventListener("click", () => {
         businessTab.classList.add("active");
         buddyTab.classList.remove("active");
-        // Show a toast that business login is coming soon
-        this.showToast("Business login coming soon! Use Buddy login for now.", "info");
+        if (demoLoginBtn) {
+          demoLoginBtn.innerHTML = `
+            <div class="demo-avatar" style="background:#d97706; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;">🏪</div>
+            <div>
+              <div style="font-weight:700; font-size:0.8125rem; color:#92400e;">The Study Mess — Demo Partner</div>
+              <div style="font-size:0.7rem; color:#b45309;">⚡ Instant Business Login — 1-click test</div>
+            </div>`;
+        }
+        if (loginSubmitBtn) loginSubmitBtn.textContent = "Log In as Partner →";
+      });
+    }
+
+    // Role Switcher inside Business view
+    const btnBizSwitchRole = document.getElementById("btnBizSwitchRole");
+    if (btnBizSwitchRole) {
+      btnBizSwitchRole.addEventListener("click", () => {
+        if (appState && appState.data) {
+          appState.data.role = "buddy";
+          appState.saveState();
+        }
+        this.showToast("Switched to Buddy View ✓", "success");
+        NutriAINav.navigateTo("dashboard");
       });
     }
 
@@ -156,7 +189,6 @@ const NutriAIApp = {
     if (guestSignInBtn) {
       guestSignInBtn.addEventListener("click", () => this.openModal("modalAuthLogin"));
     }
-
 
     // Switch between Login and Signup Modals
     const switchToSignup = document.getElementById("switchToSignup");
@@ -178,28 +210,60 @@ const NutriAIApp = {
       });
     }
 
-    // ── ONE-CLICK DEMO LOGIN ──────────────────────────────────────────
-    const demoLoginBtn = document.getElementById("demoLoginBtn");
+    // ── ONE-CLICK DUAL-ROLE DEMO LOGIN ──────────────────────────────────────────
     if (demoLoginBtn) {
       demoLoginBtn.addEventListener("click", () => {
         NutriAIApp._loginInProgress = true;
         try {
-          const demoProfile = JSON.parse(JSON.stringify(NutriAIData.defaultProfile));
-          // Direct state mutation — most reliable approach
-          appState.data.isLoggedIn = true;
-          appState.data.profile = demoProfile;
-          try {
-            localStorage.setItem("nutriai_active_user_v3", demoProfile.email || "alex.morgan@example.com");
-            localStorage.setItem("nutriai_user_email", demoProfile.email || "alex.morgan@example.com");
-          } catch (e) {}
-          appState.recalculateTargets();
-          appState.saveState();
-          this.closeAllModals();
-          this.showToast("Logged in as Alex Morgan (Demo) ✓", "success");
-          setTimeout(() => {
-            NutriAINav.navigateTo("dashboard");
-            NutriAIApp._loginInProgress = false;
-          }, 50);
+          const isBusiness = businessTab && businessTab.classList.contains("active");
+
+          if (isBusiness) {
+            // Log in as Business Partner (The Study Mess)
+            appState.data.isLoggedIn = true;
+            appState.data.role = "business";
+            appState.data.profile = {
+              name: "Vikram Joshi",
+              email: "manager@thestudymess.com",
+              canteenName: "The Study Mess",
+              campusLocation: "FC Road, Opposite Gate 2, Pune",
+              goal: "Campus Canteen Partner",
+              category: "Mess",
+              rating: 4.8
+            };
+            try {
+              localStorage.setItem("nutriai_active_user_v3", "manager@thestudymess.com");
+              localStorage.setItem("nutriai_user_email", "manager@thestudymess.com");
+              localStorage.setItem("nutriai_role", "business");
+            } catch (e) {}
+
+            appState.saveState();
+            this.closeAllModals();
+            this.showToast("Logged in as The Study Mess (Partner Portal) ✓", "success");
+            setTimeout(() => {
+              NutriAINav.navigateTo("business");
+              NutriAIApp._loginInProgress = false;
+            }, 50);
+          } else {
+            // Log in as Buddy (Alex Morgan)
+            const demoProfile = JSON.parse(JSON.stringify(NutriAIData.defaultProfile));
+            appState.data.isLoggedIn = true;
+            appState.data.role = "buddy";
+            appState.data.profile = demoProfile;
+            try {
+              localStorage.setItem("nutriai_active_user_v3", demoProfile.email || "alex.morgan@example.com");
+              localStorage.setItem("nutriai_user_email", demoProfile.email || "alex.morgan@example.com");
+              localStorage.setItem("nutriai_role", "buddy");
+            } catch (e) {}
+
+            appState.recalculateTargets();
+            appState.saveState();
+            this.closeAllModals();
+            this.showToast("Logged in as Alex Morgan (Buddy) ✓", "success");
+            setTimeout(() => {
+              NutriAINav.navigateTo("dashboard");
+              NutriAIApp._loginInProgress = false;
+            }, 50);
+          }
         } catch (e) {
           NutriAIApp._loginInProgress = false;
           console.error("Demo login error:", e);
